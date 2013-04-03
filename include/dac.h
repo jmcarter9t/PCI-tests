@@ -1,0 +1,1 @@
+int dac(unsigned base,unsigned ebase,unsigned ch,int df);

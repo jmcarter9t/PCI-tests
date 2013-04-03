@@ -1,13 +1,24 @@
 #include <string.h>
+
+
+#ifdef DOS
 #include <ctype.h>
 #include <dos.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <conio.h>
-#include <stddef.h>
 #include <conio.h>
 #include <graphics.h>
+#elsif LINUX
+
+
+#else
+
+#endif
+
+#include <stdlib.h>
+#include <stdio.h>
 #include <time.h>
+#include <stddef.h>
+
+
 #include "8255test.h"
 #include "16550.h"
 #include "8254.h"
@@ -20,43 +31,7 @@
 #include "ai.h"
 #include "idiido.h"
 #include "irq0-15.h"
-
-
-#define TRUE  1
-#define FALSE 0
-#define IGNORE -1
-
-#define YESCOS TRUE
-#define NOCOS  FALSE
-
-#define YES48 TRUE
-#define NO48  FALSE
-
-#define YES232 TRUE
-#define NO232  FALSE
-
-#define YESCOUNT TRUE
-#define NOCOUNT FALSE
-
-#define YES485 TRUE
-#define NO485 FALSE
-
-#define YESHD TRUE
-#define NOHD FALSE
-
-#define YESFIFO TRUE
-#define NOFIFO FALSE
-
-#define PASSED 0
-#define FAILED !PASSED
-
-#define DAC TRUE
-#define NODAC FALSE
-
-#define S_232 0
-#define S_422 1
-#define S_485 2
-#define S_IGNORE -1
+#include "error_codes.h"
 
 #pragma inline
 
@@ -186,7 +161,7 @@ tcardlist list[]=
         {0xECAA,PCIA1216A,"PCI-A12-16A"   ,16,YESFIFO,IGNORE,IGNORE,IGNORE},
       };
 
-
+#ifdef DOS
 void OutPortDW(unsigned Port, unsigned long Value)
 {
     asm {
@@ -195,6 +170,12 @@ void OutPortDW(unsigned Port, unsigned long Value)
         out     dx,eax
     }
 }
+#elsif LINUX
+
+
+#endif
+
+
 
 void OTHERINFO()
 { int rn;
@@ -464,9 +445,9 @@ void PCICOM1S(char *name, int numport)
 void PCIDIO(char *name, int numadd, int D48Flag, int COSFlag, int COUNTFlag, int HDFlag)
 {
   result = read_configuration_word(bn,df,regnum = 0x18,&basea);
-  basea&=0xFFFE;
+  basea &= 0xFFFE;
   result += read_configuration_word(bn,df,regnum = 0x3C,&irqnum);
-  irqnum&=0xF;
+  irqnum &= 0xF;
   if (!result)
   {
     int i = 0;
@@ -491,7 +472,7 @@ void PCIDIO(char *name, int numadd, int D48Flag, int COSFlag, int COUNTFlag, int
     while(!kbhit());
     getch();
     result = read_configuration_word(bn,df,regnum = 0x18,&basea);
-    basea&=0xFFFE;
+    basea &= 0xFFFE;
     for(i = 0; i < numadd; i++)
     {
       result =  _8255WalkingTest(basea,NODAC,DebugFlag);
@@ -520,7 +501,7 @@ void PCIDIO(char *name, int numadd, int D48Flag, int COSFlag, int COUNTFlag, int
    if(COUNTFlag)
    {
      result = read_configuration_word(bn,df,regnum = 0x18,&basea);
-     basea&=0xFFFE;
+     basea &= 0xFFFE;
 
      basec = basea + 0x10;
      if(numadd==4)
@@ -555,14 +536,14 @@ void PCIeDIO(char *name, int numadd, int D48Flag, int COSFlag, int COUNTFlag, in
 {
   printf("%12s\n\r",name);
   result = read_configuration_word(bn,df,regnum = 0x14, &basea); //enable IRQ generation
-  basea&=0xFFFE;
+  basea &= 0xFFFE;
   outportb(basea+0x69,0x09);
 
   result = read_configuration_word(bn,df,regnum = 0x18, &basea);
-  basea&=0xFFFE;
+  basea &= 0xFFFE;
 
   result += read_configuration_word(bn,df,regnum = 0x3C, &irqnum);
-  irqnum&=0xF;
+  irqnum &= 0xF;
 
   int i = 0;
   printf("Please install the wrap plugs now.\n\r");
@@ -574,7 +555,7 @@ void PCIeDIO(char *name, int numadd, int D48Flag, int COSFlag, int COUNTFlag, in
   if (!result)
   {
     result = read_configuration_word(bn,df,regnum = 0x18,&basea);
-    basea&=0xFFFE;
+    basea &= 0xFFFE;
     for(i = 0; i < numadd; i++)
     {
       result =  _8255WalkingTest(basea,NODAC,DebugFlag);
@@ -603,7 +584,7 @@ void PCIeDIO(char *name, int numadd, int D48Flag, int COSFlag, int COUNTFlag, in
    if(COUNTFlag)
    {
      result = read_configuration_word(bn,df,regnum = 0x18,&basea);
-     basea&=0xFFFE;
+     basea &= 0xFFFE;
 
      basec = basea + 0x10;
      if(numadd==4)
@@ -632,7 +613,7 @@ void PCIeDIO(char *name, int numadd, int D48Flag, int COSFlag, int COUNTFlag, in
    }//end COUNTFlag
   }//if card found
   result = read_configuration_word(bn,df,regnum = 0x14,&basea);
-  basea&=0xFFFE;
+  basea &= 0xFFFE;
   cprintf("BAR[1] @ %04X.  Writing 0x01 to BAR[1]+0x69",basea);
   outportb(basea+0x69,0x01);
 
@@ -649,18 +630,18 @@ void PCIeDIO24DSTest(char *name, int D48Flag, int COSFlag, int COUNTFlag, int HD
     textcolor(LIGHTGRAY);
 
     result = read_configuration_word(bn,df,regnum = 0x3C,&irqnum);
-    irqnum&=0xF;
+    irqnum &= 0xF;
 
     printf( "%12s IRQ(hex):%01X\n\r", name, irqnum );
     result += read_configuration_word( bn, df, regnum = 0x14, &baseb );
-    baseb &= 0xFFFE;
+    baseb  &=  0xFFFE;
     outportb( baseb + 0x69, 0x09 );
 
     result += read_configuration_word(bn,df,regnum = 0x18,&basea);
-    basea&=0xFFFE;
+    basea &= 0xFFFE;
 
     result += read_configuration_word(bn,df,regnum = 0x3C,&irqnum);
-    irqnum&=0xF;
+    irqnum &= 0xF;
 
 
     printf("Please make sure no wrap plugs are installed\n\r"
@@ -862,9 +843,9 @@ int _96bitIRQtest(int base,int irq)
 void PCIDIOPairPair(char *name)
 {
   result = read_configuration_word(bn,df,regnum = 0x18,&basea);
-  basea&=0xFFFE;
+  basea &= 0xFFFE;
   result |= read_configuration_word(bn,df,regnum = 0x3C,&irqnum);
-  irqnum&=0xF;
+  irqnum &= 0xF;
 
   result |= _8255PairPair(basea, irqnum, DebugFlag);
 //  outport(basea+0x12,0xaaaa);
@@ -881,9 +862,9 @@ void PCIAI(char *name, int channel, unsigned int FIFO)
 {
 
   result = read_configuration_word(bn,df,regnum = 0x18,&basea);
-  basea&=0xFFFE;
+  basea &= 0xFFFE;
   result += read_configuration_word(bn,df,regnum = 0x3C,&irqnum);
-  irqnum&=0xF;
+  irqnum &= 0xF;
   textcolor(LIGHTGRAY);
   cprintf("      Base:%04X  IRQ:%x\n\r",basea,irqnum);
 
@@ -920,11 +901,11 @@ void PCIDA(char *name, int channel)
 {
   int index;
   result = read_configuration_word(bn,df,regnum = 0x18,&basea);
-  basea &= 0xFFFE;
+  basea  &=  0xFFFE;
   result = read_configuration_word(bn,df,regnum = 0x1C,&basee);
-  basee &= 0xFFFE;
+  basee  &=  0xFFFE;
   result += read_configuration_word(bn,df,regnum = 0x3C,&irqnum);
-  irqnum &= 0xF;
+  irqnum  &=  0xF;
 
   textcolor(result?RED:GREEN);
   cprintf("card:%s  Base: %04X  EEPROM Base: %04X\n\r", name,basea, basee);
@@ -957,12 +938,12 @@ void PCIWDG(char *name,int numport)
    cprintf("%40s\n\r",name);
    result = 0;
    result += read_configuration_word(bn,df,regnum = 0x3C,&irqnum);
-   irqnum &= 0xF;
+   irqnum  &=  0xF;
    index = 0;
   // for(index = 0; index < numport; index++)
   //  {
      result += read_configuration_word(bn,df,regnum = start,&base[0]);
-     base[index] &= 0xFFFE;
+     base[index]  &=  0xFFFE;
      base[1]=base[0]+0x10;
      base[2]=base[1]+8;
   //   start += 8;
@@ -1034,11 +1015,11 @@ void PCICOM(char *name,int RS485,int numport)
    cprintf("%40s\n\r",name);
    result = 0;
    result += read_configuration_word(bn,df,regnum = 0x3C,&irqnum);
-   irqnum &= 0xF;
+   irqnum  &=  0xF;
    for(index = 0; index < numport; index++)
     {
      result += read_configuration_word(bn,df,regnum = start,&base[index]);
-     base[index] &= 0xFFFE;
+     base[index]  &=  0xFFFE;
      start += 4;
      textcolor(result?RED:GREEN);
      cprintf("      COM %c:%04X  IRQ:%hu%40s\n\r", port[index],base[index], irqnum,result?"FAILED":"PASSED");
@@ -1142,9 +1123,9 @@ void PCIeCOM4S(char *name, int numport, byte F1, byte F2, byte F3)
    //maxport = 8;
    result = 0;
    result += read_configuration_word(bn,df,regnum = 0x3C,&irqnum);
-   irqnum &= 0xF;
+   irqnum  &=  0xF;
    result += read_configuration_word(bn,df,regnum = start,&base[0]);
-   base[0] &= 0xFFFE;
+   base[0]  &=  0xFFFE;
    base[1]=base[0]+8;
    base[2]=base[0]+16;
    base[3]=base[0]+0x38;
@@ -1163,9 +1144,9 @@ void PCIeCOM8S(char *name, int numport, byte F1, byte F2, byte F3)
    //maxport = 8;
    result = 0;
    result += read_configuration_word(bn,df,regnum = 0x3C,&irqnum);
-   irqnum &= 0xF;
+   irqnum  &=  0xF;
    result += read_configuration_word(bn,df,regnum = start,&base[0]);
-   base[0] &= 0xFFFE;
+   base[0]  &=  0xFFFE;
    base[1]=base[0]+8;
    base[2]=base[0]+16;
    base[3]=base[0]+0x18;
@@ -1178,9 +1159,9 @@ void PCIeCOM8S(char *name, int numport, byte F1, byte F2, byte F3)
 
 void PCIWDGCSM(char *name)
 { result = read_configuration_word(bn,df,regnum = 0x18,&basea);
-  basea &= 0xFFFE;
+  basea  &=  0xFFFE;
   result += read_configuration_word(bn,df,regnum = 0x3C,&irqnum);
-  irqnum &= 0xF;
+  irqnum  &=  0xF;
 
   if (!result){
     //test if card found
@@ -1199,14 +1180,14 @@ void PCIIIRO(char *name)
 {
 
   result = read_configuration_word(bn,df,regnum = 0x14,&basea); //enable IRQ generation
-  basea&=0xFFFE;
+  basea &= 0xFFFE;
   outportb(basea+0x69,0x09);
 
 
   result = read_configuration_word(bn,df,regnum = 0x18,&basea);
-  basea &= 0xFFFE;
+  basea  &=  0xFFFE;
   result += read_configuration_word(bn,df,regnum = 0x3C,&irqnum);
-  irqnum &= 0xF;
+  irqnum  &=  0xF;
   if (!result){
     //test if card found
     textcolor(LIGHTGRAY);
@@ -1243,13 +1224,13 @@ void PCIIIRO16(char *name)
 {
 
   result = read_configuration_word(bn,df,regnum = 0x14,&basea); //enable IRQ generation
-  basea&=0xFFFE;
+  basea &= 0xFFFE;
   outportb(basea+0x69,0x09);
 
   result = read_configuration_word(bn,df,regnum = 0x18,&basea);
-  basea &= 0xFFFE;
+  basea  &=  0xFFFE;
   result += read_configuration_word(bn,df,regnum = 0x3C,&irqnum);
-  irqnum &= 0xF;
+  irqnum  &=  0xF;
   if (!result){
     //test if card found
     textcolor(LIGHTGRAY);
@@ -1292,9 +1273,9 @@ void PCIIIRO16(char *name)
 void PCIIDIO16(char *name)
 {
   result = read_configuration_word(bn,df,regnum = 0x18,&basea);
-  basea &= 0xFFFE;
+  basea  &=  0xFFFE;
   result += read_configuration_word(bn,df,regnum = 0x3C,&irqnum);
-  irqnum &= 0xF;
+  irqnum  &=  0xF;
   if (!result){
     //test if card found
     textcolor(LIGHTGRAY);
@@ -1445,7 +1426,7 @@ void main(int argc, char *argv[])
               else
               {
                   read_configuration_word(bn,df,regnum = 0x18,&IDIAddr);
-                  IDIAddr &= 0xFFFE;
+                  IDIAddr  &=  0xFFFE;
 
                   read_configuration_byte(bn,df,regnum = 0x3C,&IDIIRQ);
 
@@ -1487,7 +1468,7 @@ void main(int argc, char *argv[])
               else
               {
                   read_configuration_word(bn,df,regnum = 0x18,&IDOAddr);
-                  IDOAddr &= 0xFFFE;
+                  IDOAddr  &=  0xFFFE;
 
                   textcolor(LIGHTGRAY);
                   cprintf("%s detected, and added to the IDI/IDO tests.\n\r", list[i].cn);
