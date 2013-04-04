@@ -1,22 +1,27 @@
 #ifndef IO_H
 #define IO_H
 
-#define OUTPORT outb
-#define OUTPORTB outb
+#include "common_objects.h"
+#include <ncurses.h>
+
+
+#define OUTPORT(address,value) outb(value,address)
+#define OUTPORTB(address,value) outb(value,address)
 #define INPORT inb_p
 #define INPORTB inb
 
-#define STRCMP   strcmp
-#define GETCH    getchar
+#define interrupt
+#define far 
 
 
-#define DELAY  usleep
+#define DELAY(x)  usleep(x*1000)
 #ifndef CLK_TCK
 #define CLK_TCK      CLOCKS_PER_SEC
 #endif
 
 #define INTERRUPT 
 
-#define READ_CONFIGURATION_WORD(w,x,y,z) 1
+int kbhit(void);
+
 
 #endif

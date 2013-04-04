@@ -1,5 +1,5 @@
-#ifndef _IRQ0_15_H
-#define _IRQ0_15_H
+#ifndef IRQ0_15_H
+#define IRQ0_15_H
 // IRQ0-15.H
 // Allows installation of ISR into any interrupt request line
 
@@ -8,8 +8,6 @@ struct interupt_service_request_t  {
 };
 
 typedef struct interupt_service_request_t ISR;
-
-
 
 
 // kills the current interrupt, no matter where it is

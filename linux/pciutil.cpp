@@ -1,53 +1,48 @@
 /************************************************************************/
-/*                                                                          */
-/* Module: PCILIB.C                                                         */
-/*                                                                          */
-/* Purpose: Define a C interface to the PCI BIOS                            */
-/*                                                                          */
-/* Functions Defined:                                                       */
-/*                                                                          */
-/*    PCI_BIOS_PRESENT                                                      */
-/*    FIND_PCI_DEVICE                                                       */
-/*    FIND_PCI_CLASS_CODE                                                   */
-/*    GENERATE_SPECIAL_CYCLE                                                */
-/*    READ_CONFIGURATION_BYTE                                               */
-/*    READ_CONFIGURATION_WORD                                               */
-/*    READ_CONFIGURATION_DWORD                                              */
-/*    WRITE_CONFIGURATION_BYTE                                              */
-/*    WRITE_CONFIGURATION_WORD                                              */
-/*    WRITE_CONFIGURATION_DWORD                                             */
-/*    OUTPD                                                                 */
-/*    INPD                                                                  */
-/*    INSB                                                                  */
-/*    INSW                                                                  */
-/*    INSD                                                                  */
-/*    OUTSB                                                                 */
-/*    OUTSW                                                                 */
-/*    OUTSD                                                                 */
-/*                                                                          */
-/* Local Functions                                                          */
-/*                                                                          */
-/*    READ_CONFIGURATION_AREA                                               */
-/*    WRITE_CONFIGURATION_AREA                                              */
-/*                                                                          */
-/****************************************************************************/
+/*                                                                         
+/* Module: PCIUTIL.CPP                                                     
+/*                                                                         
+/* Purpose: Define a CPP interface to the PCI BIOS                           
+/*                                                                         
+/* Functions Defined:                                                      
+/*                                                                         
+/*    PCI_BIOS_PRESENT                                                     
+/*    FIND_PCI_DEVICE                                                      
+/*    FIND_PCI_CLASS_CODE                                                  
+/*    GENERATE_SPECIAL_CYCLE                                               
+/*    READ_CONFIGURATION_BYTE                                              
+/*    READ_CONFIGURATION_WORD                                              
+/*    READ_CONFIGURATION_DWORD                                             
+/*    WRITE_CONFIGURATION_BYTE                                             
+/*    WRITE_CONFIGURATION_WORD                                             
+/*    WRITE_CONFIGURATION_DWORD                                            
+/*    OUTPD                                                                
+/*    INPD                                                                 
+/*    INSB                                                                 
+/*    INSW                                                                 
+/*    INSD                                                                 
+/*    OUTSB                                                                
+/*    OUTSW                                                                
+/*    OUTSD                                                                
+/*                                                                         
+/* Local Functions                                                         
+/*                                                                         
+/*    READ_CONFIGURATION_AREA                                              
+/*    WRITE_CONFIGURATION_AREA                                             
+/*                                                                         
+/****************************************************************************
 
-/****************************************************************************/
-/*                                                                          */
-/* Include Files                                                            */
-/*                                                                          */
+/****************************************************************************
+/*                                                                          
+/* Include Files                                                            
+/*                                                                          
 /****************************************************************************/
 // #include <dos.h>
 #include <stddef.h>
+#include "pciutil.h"
+#include "display.h"
 
-#include "pcilib.h"
 
-/****************************************************************************/
-/*                                                                          */
-/* Local Prototypes                                                         */
-/*                                                                          */
-/****************************************************************************/
-/*
 static int read_configuration_area(byte function,
 				   byte bus_number,
 				   byte device_and_function,
@@ -59,7 +54,7 @@ static int write_configuration_area(byte function,
 				   byte device_and_function,
 				   byte register_number,
 				   dword value);
-*/
+
 /****************************************************************************/
 /*                                                                          */
 /* Define macros to obtain individual bytes from a word register            */
@@ -188,7 +183,7 @@ int find_pci_device(word device_id,
 /*       DEVICE_NOT_FOUND - Device not found                                */          
 /*                                                                          */
 /****************************************************************************/
-#ifdef DOS
+
 int find_pci_class_code(dword class_code,
 		    word index,
 		    byte *bus_number,
@@ -228,20 +223,19 @@ int generate_special_cycle(byte bus_number,
 {
    int ret_status; /* Function Return Status */
    word ax, flags; /* Temporary variables to hold register values */
-   ax = 1;
-   flags =2;
+   // ax = 1;
+   // flags =2;
 
-   /* Call PCI BIOS Int 1Ah interface */
-   geninterrupt(0x1a);
-
-   /* First check if CARRY FLAG Set, if so, error has occurred */
-   if ((flags & CARRY_FLAG) == 0) {
-      /* Get Return code from BIOS */
-      ret_status = HIGH_BYTE(ax);
-   }
-   else {
-      ret_status = NOT_SUCCESSFUL;
-   }
+   // /* Call PCI BIOS Int 1Ah interface */
+   // geninterrupt(0x1a);
+   // /* First check if CARRY FLAG Set, if so, error has occurred */
+   // if ((flags & CARRY_FLAG) == 0) {
+   //    /* Get Return code from BIOS */
+   //    ret_status = HIGH_BYTE(ax);
+   // }
+   // else {
+   //    ret_status = NOT_SUCCESSFUL;
+   // }
 
    return (ret_status);
 }
@@ -439,36 +433,6 @@ static int read_configuration_area(byte function,
    dword ecx;      /* Temporary variable to hold ECX register value */
    
    /* Load entry registers for PCI BIOS */
-   _BH = bus_number;
-   _BL = device_and_function;
-   _DI = register_number;
-   _AH = PCI_FUNCTION_ID;
-   _AL = function;
-
-   /* Call PCI BIOS Int 1Ah interface */
-   geninterrupt(0x1a);
-
-   /* Save registers before overwritten by compiler usage of registers */
-   ecx = _ECX;
-   ax = _AX;
-   flags = _FLAGS;
-
-   /* First check if CARRY FLAG Set, if so, error has occurred */
-   if ((flags & CARRY_FLAG) == 0) {
-
-      /* Get Return code from BIOS */
-      ret_status = HIGH_BYTE(ax);
-
-      /* If successful, return data */
-      if (ret_status == SUCCESSFUL) {
-	 *data = ecx;   
-      }
-   }
-   else {
-      ret_status = NOT_SUCCESSFUL;
-   }
-
-
    return (ret_status);
 }
 
@@ -648,29 +612,6 @@ static int write_configuration_area(byte function,
    word ax, flags; /* Temporary variables to hold register values */
    
    /* Load entry registers for PCI BIOS */
-   _BH = bus_number;
-   _BL = device_and_function;
-   _ECX = value;
-   _DI = register_number;
-   _AH = PCI_FUNCTION_ID;
-   _AL = function;
-
-   /* Call PCI BIOS Int 1Ah interface */
-   geninterrupt(0x1a);
-
-   /* Save registers before overwritten by compiler usage of registers */
-   ax = _AX;
-   flags = _FLAGS;
-
-   /* First check if CARRY FLAG Set, if so, error has occurred */
-   if ((flags & CARRY_FLAG) == 0) {
-
-      /* Get Return code from BIOS */
-      ret_status = HIGH_BYTE(ax);
-   }
-   else {
-      ret_status = NOT_SUCCESSFUL;
-   }
 
    return (ret_status);
 }
@@ -697,11 +638,10 @@ static int write_configuration_area(byte function,
 
 void outpd(word port, dword value)
 {
-   _DX = port;
-   _EAX = value;
-
-   /* Since asm cannot generate OUT  DX, EAX must force in */
-   __emit__(0x66, 0xEF);
+   // _DX = port;
+   // _EAX = value;
+   // /* Since asm cannot generate OUT  DX, EAX must force in */
+   // __emit__(0x66, 0xEF);
 }
 
 /****************************************************************************/
@@ -724,13 +664,12 @@ void outpd(word port, dword value)
 
 dword inpd(word port)
 {
-   /* Set DX register to port number to be input from */
-   _DX = port; 
+   // /* Set DX register to port number to be input from */
+   // _DX = port; 
+   // /* Since asm cannot generate IN  EAX, DX, must force in */
+   // __emit__(0x66, 0xED);
 
-   /* Since asm cannot generate IN  EAX, DX, must force in */
-   __emit__(0x66, 0xED);
-
-   return(_EAX);
+   return(0);
 }
 
 /****************************************************************************/
@@ -758,11 +697,11 @@ dword inpd(word port)
 
 void insb(word port, void *buf, int count)
 {
-   _ES = FP_SEG(buf);   /* Segment of buf */
-   _DI = FP_OFF(buf);   /* Offset of buf  */
-   _CX = count;         /* Number to read */
-   _DX = port;          /* Port           */
-   asm   REP INSB;
+   // _ES = FP_SEG(buf);   /* Segment of buf */
+   // _DI = FP_OFF(buf);   /* Offset of buf  */
+   // _CX = count;         /* Number to read */
+   // _DX = port;          /* Port           */
+   // asm   REP INSB;
 }
 
 /****************************************************************************/
@@ -790,11 +729,11 @@ void insb(word port, void *buf, int count)
 
 void insw(word port, void *buf, int count)
 {
-   _ES = FP_SEG(buf);   /* Segment of buf */
-   _DI = FP_OFF(buf);   /* Offset of buf  */
-   _CX = count;         /* Number to read */
-   _DX = port;          /* Port           */
-   asm   REP INSW;
+   // _ES = FP_SEG(buf);   /* Segment of buf */
+   // _DI = FP_OFF(buf);   /* Offset of buf  */
+   // _CX = count;         /* Number to read */
+   // _DX = port;          /* Port           */
+   // asm   REP INSW;
 }
 
 /****************************************************************************/
@@ -822,11 +761,11 @@ void insw(word port, void *buf, int count)
 
 void insd(word port, void *buf, int count)
 {
-   _ES = FP_SEG(buf);   /* Segment of buf */
-   _DI = FP_OFF(buf);   /* Offset of buf  */
-   _CX = count;         /* Number to read */
-   _DX = port;          /* Port           */
-   __emit__(0xf3, 0x66, 0x6D); /* asm  REP INSD */
+   // _ES = FP_SEG(buf);   /* Segment of buf */
+   // _DI = FP_OFF(buf);   /* Offset of buf  */
+   // _CX = count;         /* Number to read */
+   // _DX = port;          /* Port           */
+   // __emit__(0xf3, 0x66, 0x6D); /* asm  REP INSD */
 }
 
 /****************************************************************************/
@@ -854,11 +793,11 @@ void insd(word port, void *buf, int count)
 
 void outsb(word port, void *buf, int count)
 {
-   _SI = FP_SEG(buf);   /* Segment of buf  */
-   _DI = FP_OFF(buf);   /* Offset of buf  */
-   _CX = count;         /* Number to read */
-   _DX = port;          /* Port           */
-   asm   REP OUTSB;
+   // _SI = FP_SEG(buf);   /* Segment of buf  */
+   // _DI = FP_OFF(buf);   /* Offset of buf  */
+   // _CX = count;         /* Number to read */
+   // _DX = port;          /* Port           */
+   // asm   REP OUTSB;
 }
 
 /****************************************************************************/
@@ -886,11 +825,11 @@ void outsb(word port, void *buf, int count)
 
 void outsw(word port, void *buf, int count)
 {
-   _SI = FP_SEG(buf);   /* Segment of buf  */
-   _DI = FP_OFF(buf);   /* Offset of buf  */
-   _CX = count;         /* Number to read */
-   _DX = port;          /* Port           */
-   asm   REP OUTSW;
+   // _SI = FP_SEG(buf);   /* Segment of buf  */
+   // _DI = FP_OFF(buf);   /* Offset of buf  */
+   // _CX = count;         /* Number to read */
+   // _DX = port;          /* Port           */
+   // asm   REP OUTSW;
 }
 
 /****************************************************************************/
@@ -918,12 +857,19 @@ void outsw(word port, void *buf, int count)
 
 void outsd(word port, void *buf, int count)
 {
-   _SI = FP_SEG(buf);   /* Segment of buf  */
-   _DI = FP_OFF(buf);   /* Offset of buf  */
-   _CX = count;         /* Number to read */
-   _DX = port;          /* Port           */
-   __emit__(0xf3, 0x66, 0x6F); /* asm   REP OUTSD; */
+   // _SI = FP_SEG(buf);   /* Segment of buf  */
+   // _DI = FP_OFF(buf);   /* Offset of buf  */
+   // _CX = count;         /* Number to read */
+   // _DX = port;          /* Port           */
+   // __emit__(0xf3, 0x66, 0x6F); /* asm   REP OUTSD; */
 }
 
-
-
+void IOPermissions()
+{
+  if(iopl(3)<0)
+  {
+     endwin();
+     fprintf(stderr, "NO IO PERMISSION\n");
+     _exit(1);
+  }
+}

@@ -10,13 +10,16 @@
 /****************************************************************************/
 /*  General Constants                                                       */
 /****************************************************************************/
+#include "data_types.h"
+#include <termios.h>
+#include <sys/time.h>
+#include <sys/select.h>
+#include <sys/io.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-#define TRUE    1
-#define FALSE   0
 
-typedef unsigned char byte;     /* 8-bit  */
-typedef unsigned short word;    /* 16-bit */
-typedef unsigned long dword;    /* 32-bit */
 
 #define CARRY_FLAG 0x01         /* 80x86 Flags Register Carry Flag bit */
 
@@ -125,15 +128,19 @@ int write_configuration_dword(byte bus_number,
 			      byte register_number,
 			      dword dword_to_write);
 
+static 
 int read_configuration_area(byte function,
 				   byte bus_number,
 				   byte device_and_function,
 				   byte register_number,
 				   dword *data);
 
+static 
 int write_configuration_area(byte function,
-				   byte bus_number,
-				   byte device_and_function,
-				   byte register_number,
-				   dword value);
-                  
+                             byte bus_number,
+                             byte device_and_function,
+                             byte register_number,
+                             dword value);
+
+void
+IOPermissions();

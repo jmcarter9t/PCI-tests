@@ -40,7 +40,7 @@
 // #include <dos.h>
 #include <stddef.h>
 
-#include "pcilib.h"
+#include "pciutil.h"
 
 /****************************************************************************/
 /*                                                                          */

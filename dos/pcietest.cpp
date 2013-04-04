@@ -22,7 +22,7 @@
 #include "8255test.h"
 #include "16550.h"
 #include "8254.h"
-#include "pcilib.h"
+#include "pciutil.h"
 #include "485Test.h"
 #include "iiro8.h"
 #include "iiro16.h"
