@@ -5,7 +5,6 @@
 #include "irq.h"
 
 
-
 /*****************************************************************************
  *  FUNCTION: soft_filter_test -- local routine                              *
  *****************************************************************************/
@@ -118,17 +117,17 @@ unsigned int iiro16_interrupt_test(unsigned int base_address, unsigned int IRQNu
     //INPORTB(base_address+1);
     OUTPORTB(base_address+1,0x00); // Clear the interrupt.
     INPORTB(base_address+2);         //Read to enable interrupts. Writing disables
-    iiro16_isr_iiroflag = 0;
+    iiro_isr_iiroflag = 0;
     DELAY(10);
     out = 0xFF;
     for(i = 0; i < 8; i++){
        out = out - (1<<i);
        OUTPORTB(base_address + RelayOffset,out); //generate interrupt
        DELAY(1000);
-       if (!iiro16_isr_iiroflag)
+       if (!iiro_isr_iiroflag)
          passed = FAILED;
          // flag++;
-       iiro16_isr_iiroflag = 0;
+       iiro_isr_iiroflag = 0;
     }
     //INPORTB(base_address+1);
     OUTPORTB(base_address+1,0x00); // Clear the interrupt.
@@ -153,14 +152,14 @@ unsigned int iiro16_interrupt_test(unsigned int base_address, unsigned int IRQNu
       OUTPORTB(base_address+2,0x00); //disable interrupt
       OUTPORTB(base_address+1,0x00); // Clear the interrupt.
       INPORTB(base_address+2);         //Read to enable interrupts. Writing disables
-      iiro16_isr_iiroflag = 0;
+      iiro_isr_iiroflag = 0;
       DELAY(10);
       GOTOXY( 3, WHEREY() );
       for(i = 0; i < 8; i++){
         out = out - (1<<i);
         OUTPORTB(base_address + RelayOffset,out); //generate interrupt
         DELAY(1000);
-        if (!iiro16_isr_iiroflag)
+        if (!iiro_isr_iiroflag)
         {
           flag++;//how many times did we get no IRQ
           TEXT_COLOR(RED);
@@ -169,7 +168,7 @@ unsigned int iiro16_interrupt_test(unsigned int base_address, unsigned int IRQNu
           TEXT_COLOR(GREEN);
           CPRINTF("%-9s", "IRQ");
         }
-        iiro16_isr_iiroflag = 0;
+        iiro_isr_iiroflag = 0;
       }//end for (8 bits)
       OUTPORTB(base_address+1,0x00); // Clear the interrupt.
       OUTPORTB(base_address+2,0x00); //disable interrupt

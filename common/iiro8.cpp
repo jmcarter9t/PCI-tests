@@ -1,10 +1,12 @@
 #include "display.h"
 #include "io.h"
+#include "data_types.h"
 #include "common_objects.h"
 #include "irq.h"
+#include "iiro8.h"
 
-
-unsigned int baseaddress;
+// unsigned int baseaddress;
+// unsigned int isr_iiroflag;
 
 /* Global variables */
 int LatchCode = 0; /* Determines the actions performed by the latch function,
@@ -14,7 +16,7 @@ int ScreenPosition = 0; /* Used to determine the position of the relay
 int RelayNumber = 0; /* Used to store the relay number of the relay which
 			is being displayed on the screen by the latch
 			function. */
-unsigned int isr_iiroflag;
+
 
 
 /*****************************************************************************
@@ -249,7 +251,7 @@ unsigned long       count;
 void (interrupt far *oldisr)();
 int out;
 int flag = 0;
-baseaddress=base_address;
+baseadd=base_address;
 
 if(df){
   TEXT_COLOR(LIGHTGRAY);
@@ -269,7 +271,7 @@ if(!df){
   //INPORTB(base_address+1);
   OUTPORTB(base_address+1,0x00); // Clear the interrupt.
   INPORTB(base_address+2);         //Read to enable interrupts. Writing disables
-  isr_iiroflag = 0;
+  iiro_isr_iiroflag = 0;
   passed = FALSE;
   DELAY(10);
   out = 0xFF;
@@ -277,9 +279,9 @@ if(!df){
      out = out - (1<<i);
      OUTPORTB(base_address,out); //generate interrupt
      DELAY(1000);
-     if (!isr_iiroflag)
+     if (!iiro_isr_iiroflag)
        flag++;//passed = TRUE;
-     isr_iiroflag = 0;
+     iiro_isr_iiroflag = 0;
   }
 //INPORTB(base_address+1);
 OUTPORTB(base_address+1,0x00); // Clear the interrupt.
@@ -303,18 +305,18 @@ if(df){
     OUTPORTB(base_address+2,0x00); //disable interrupt
     OUTPORTB(base_address+1,0x00); // Clear the interrupt.
     INPORTB(base_address+2);         //Read to enable interrupts. Writing disables
-    isr_iiroflag = 0;
+    iiro_isr_iiroflag = 0;
     passed = FALSE;
     DELAY(10);
     for(i = 0; i < 8; i++){
       out = out - (1<<i);
       OUTPORTB(base_address,out); //generate interrupt
       DELAY(1000);
-      if (!isr_iiroflag)
+      if (!iiro_isr_iiroflag)
         flag++;// passed = TRUE;
-      TEXT_COLOR(isr_iiroflag?GREEN:RED);
-      CPRINTF("%s",isr_iiroflag?"IRQ      ":"NoIRQ    ");
-      isr_iiroflag = 0;
+      TEXT_COLOR(iiro_isr_iiroflag?GREEN:RED);
+      CPRINTF("%s",iiro_isr_iiroflag?"IRQ      ":"NoIRQ    ");
+      iiro_isr_iiroflag = 0;
     }
     GOTOXY( 1, WHEREY() );
     OUTPORTB(base_address+1,0x00); // Clear the interrupt.

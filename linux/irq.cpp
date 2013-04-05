@@ -1,7 +1,7 @@
 #include "irq.h"
 
 unsigned int baseadd;
-unsigned int iiro16_isr_iiroflag;
+unsigned int iiro_isr_iiroflag;
 
 
 // kills the current interrupt, no matter where it is
@@ -34,9 +34,10 @@ void restoreirq(char IRQnumber, unsigned char OldMask)
 
 }
 
+/* temporary placeholder ...will fail*/
 void interrupt iiro16_setiiroflag(void)
 {
-  iiro16_isr_iiroflag = 1;
+  iiro_isr_iiroflag = 1;
   /* OUTPORTB(baseadd+1,0x00); */
   /* sendEOI(); */
 }

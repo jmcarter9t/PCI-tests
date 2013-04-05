@@ -81,7 +81,10 @@ add_executable( pcietest ${COMMON_DIR}/pcietest.cpp )
 target_link_libraries( pcietest ${CORELIBS} )
 
 
-add_executable( iiro_test ${SAMPLES_DIR}/iiro16.cpp )
-target_link_libraries( iiro_test ${CORELIBS} )
+add_executable( iiro16_test ${SAMPLES_DIR}/iiro16_test.cpp )
+target_link_libraries( iiro16_test ${CORELIBS} )
+
+add_executable( iiro8_test ${SAMPLES_DIR}/iiro8_test.cpp )
+target_link_libraries( iiro8_test ${CORELIBS} )
 
 

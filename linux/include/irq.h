@@ -12,7 +12,7 @@ struct interupt_service_request_t  {
 typedef struct interupt_service_request_t ISR;
 
 extern unsigned int baseadd;
-extern unsigned int iiro16_isr_iiroflag;
+extern unsigned int iiro_isr_iiroflag;
 
 
 // kills the current interrupt, no matter where it is
