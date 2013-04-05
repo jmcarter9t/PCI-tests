@@ -1,7 +1,7 @@
 #include "display.h"
 #include "io.h"
 #include "common_objects.h"
-#include "irq0_15.h"
+#include "irq.h"
 
 
 unsigned int baseaddress;
@@ -16,19 +16,11 @@ int RelayNumber = 0; /* Used to store the relay number of the relay which
 			function. */
 unsigned int isr_iiroflag;
 
-void interrupt setiiroflag(void)
-{
-//INPORTB(baseaddress+1);
-
-OUTPORTB(baseaddress+1,0x00);
-sendEOI();
-isr_iiroflag = 1;        /* indicate an interrupt has occurred */
-}   /* end setiiroflag */
 
 /*****************************************************************************
  *  FUNCTION: soft_filter_test -- local routine                              *
  *****************************************************************************/
-unsigned int soft_filter_test(unsigned int baddress,int df)//SOFTWARE FILTER TEST
+unsigned int soft_filter_test(unsigned int base_address,int df)//SOFTWARE FILTER TEST
 {
 
 char                ch, *valstring;
@@ -37,8 +29,8 @@ unsigned char	    outbyte, inbyte;
 int                 count,int_mask,loop;
 int		    store1[8],store2[8],errorblk[8];
 
-OUTPORTB(baddress+3,0x00); /* base address + 3 */
-OUTPORTB(baddress,0x00);
+OUTPORTB(base_address+3,0x00); /* base address + 3 */
+OUTPORTB(base_address,0x00);
 passed = TRUE;
 if(df)
   CPRINTF("SOFTWARE FILTER TEST\n\r");
@@ -49,18 +41,18 @@ for(int_mask = 0;int_mask <8; int_mask++)
   {
     outbyte = 1 << int_mask;
     /* Write to base address + 0. */
-    OUTPORTB(baddress,outbyte);
+    OUTPORTB(base_address,outbyte);
     do
     {
       count++; //increment counter until data read matches data sent
-      inbyte = INPORTB(baddress+1);
+      inbyte = INPORTB(base_address+1);
     }while (!(count < 0) && inbyte != outbyte);
   }
   count /= 5; /* Take the average. */
   store1[int_mask] = count;
   DELAY(5);
 }
-  INPORTB(baddress+3);
+  INPORTB(base_address+3);
 
 for(int_mask = 0;int_mask <8; int_mask++)
   {
@@ -69,11 +61,11 @@ for(int_mask = 0;int_mask <8; int_mask++)
     {
     outbyte = 1 << int_mask;
     /* Write to base address + 0. */
-    OUTPORTB(baddress,outbyte);
+    OUTPORTB(base_address,outbyte);
     do
       {
       count++; //increment counter until data read matches data sent
-      inbyte = INPORTB(baddress+1);
+      inbyte = INPORTB(base_address+1);
       }
     while (!(count < 0) && inbyte != outbyte);
     }
@@ -117,8 +109,8 @@ for(int_mask = 0; int_mask < 8; int_mask++)
     }
   }
 
-OUTPORTB(baddress+3,0x00);
-OUTPORTB(baddress,0x00);
+OUTPORTB(base_address+3,0x00);
+OUTPORTB(base_address,0x00);
 return passed;
 
 } /* end soft_filter_test;
@@ -136,7 +128,7 @@ return passed;
  *            failure of this test through interpretation of the data.	     *
  *                                                                         *
  *****************************************************************************/
-unsigned int manual_filter_test(unsigned int baddress,int df)//MANUAL FILTER TEST
+unsigned int manual_filter_test(unsigned int base_address,int df)//MANUAL FILTER TEST
 {
 
 char                ch, *valstring;
@@ -152,10 +144,10 @@ if(df){
 }
 passed = TRUE;
 /* disable filter */
-OUTPORTB(baddress+3,0x00); /* base address + 3 */
+OUTPORTB(base_address+3,0x00); /* base address + 3 */
 DELAY(10);
 
-OUTPORTB(baddress,0x00);
+OUTPORTB(base_address,0x00);
 
 for(int_mask = 0;int_mask <8; int_mask++)
   {
@@ -164,13 +156,13 @@ for(int_mask = 0;int_mask <8; int_mask++)
     {
     outbyte = 1 << int_mask;
     /* Write to base address + 0. */
-    OUTPORTB(baddress,outbyte);
+    OUTPORTB(base_address,outbyte);
     do
       {
       count++;
       /* Read from base address + 1. Increment counter and read from the
 	 card until the data read matches the data sent out. */
-      inbyte = INPORTB(baddress+1);
+      inbyte = INPORTB(base_address+1);
       }
     while (!(count < 0) && inbyte != outbyte); // Safety feature
     }
@@ -188,13 +180,13 @@ for(int_mask = 0;int_mask <8; int_mask++)
     {
     outbyte = 1 << int_mask;
     /* Write to base address + 0. */
-    OUTPORTB(baddress,outbyte);
+    OUTPORTB(base_address,outbyte);
     do
       {
       count++;
       /* Read from base address + 1. Increment counter and read from the
 	 card until the data read matches the data sent out. */
-      inbyte = INPORTB(baddress+1);
+      inbyte = INPORTB(base_address+1);
       }
     while (!(count < 0) && inbyte != outbyte); // Safety feature
     }
@@ -239,7 +231,7 @@ for(int_mask = 0; int_mask < 8; int_mask++)
     }
   }
 
-OUTPORTB(baddress,0x00);
+OUTPORTB(base_address,0x00);
 return passed;
 } /* end manual_filter_test;
 
@@ -247,7 +239,7 @@ return passed;
  *  FUNCTION: interrupt_test -- local routine                                *
  *****************************************************************************/
 
-unsigned int interrupt_test(unsigned int baddress, unsigned int IRQNumber,int df)
+unsigned int interrupt_test(unsigned int base_address, unsigned int IRQNumber,int df)
 {
 
 char                ch;
@@ -257,7 +249,7 @@ unsigned long       count;
 void (interrupt far *oldisr)();
 int out;
 int flag = 0;
-baseaddress=baddress;
+baseaddress=base_address;
 
 if(df){
   TEXT_COLOR(LIGHTGRAY);
@@ -265,35 +257,35 @@ if(df){
 }
 DELAY(100);
 
-//INPORTB(baddress+1);
+//INPORTB(base_address+1);
 if(!df){
-  OUTPORTB(baddress+1,0x00);  //clear pending interrupt
+  OUTPORTB(base_address+1,0x00);  //clear pending interrupt
   initirq(IRQNumber,setiiroflag);
   sendEOI();
-  OUTPORTB(baddress,0x04); /* Write data to the relay outputs. */
-  //INPORTB(baddress+1);
-  OUTPORTB(baddress+1,0x00);   //clear pending interrupt
-  OUTPORTB(baddress+2,0x00); //disable interrupt
-  //INPORTB(baddress+1);
-  OUTPORTB(baddress+1,0x00); // Clear the interrupt.
-  INPORTB(baddress+2);         //Read to enable interrupts. Writing disables
+  OUTPORTB(base_address,0x04); /* Write data to the relay outputs. */
+  //INPORTB(base_address+1);
+  OUTPORTB(base_address+1,0x00);   //clear pending interrupt
+  OUTPORTB(base_address+2,0x00); //disable interrupt
+  //INPORTB(base_address+1);
+  OUTPORTB(base_address+1,0x00); // Clear the interrupt.
+  INPORTB(base_address+2);         //Read to enable interrupts. Writing disables
   isr_iiroflag = 0;
   passed = FALSE;
   DELAY(10);
   out = 0xFF;
   for(i = 0; i < 8; i++){
      out = out - (1<<i);
-     OUTPORTB(baddress,out); //generate interrupt
+     OUTPORTB(base_address,out); //generate interrupt
      DELAY(1000);
      if (!isr_iiroflag)
        flag++;//passed = TRUE;
      isr_iiroflag = 0;
   }
-//INPORTB(baddress+1);
-OUTPORTB(baddress+1,0x00); // Clear the interrupt.
-OUTPORTB(baddress+2,0x00); //disable interrupt
-//INPORTB(baddress+1);
-OUTPORTB(baddress+1,0x00); // Clear the interrupt.
+//INPORTB(base_address+1);
+OUTPORTB(base_address+1,0x00); // Clear the interrupt.
+OUTPORTB(base_address+2,0x00); //disable interrupt
+//INPORTB(base_address+1);
+OUTPORTB(base_address+1,0x00); // Clear the interrupt.
 
 sendEOI();                 //clear interrupt to allow next one
 restoreirq(IRQNumber);
@@ -303,20 +295,20 @@ if(df){
   CPRINTF("Relay 0    1        2        3        4        5        6        7\n\r");
   while( ! KBHIT() ){
     out = 0xff;
-    OUTPORTB(baddress+1,0x00);  //clear pending interrupt
+    OUTPORTB(base_address+1,0x00);  //clear pending interrupt
     initirq(IRQNumber,setiiroflag);
     sendEOI();
-    OUTPORTB(baddress,out); /* Write data to the relay outputs. */
-    OUTPORTB(baddress+1,0x00);   //clear pending interrupt
-    OUTPORTB(baddress+2,0x00); //disable interrupt
-    OUTPORTB(baddress+1,0x00); // Clear the interrupt.
-    INPORTB(baddress+2);         //Read to enable interrupts. Writing disables
+    OUTPORTB(base_address,out); /* Write data to the relay outputs. */
+    OUTPORTB(base_address+1,0x00);   //clear pending interrupt
+    OUTPORTB(base_address+2,0x00); //disable interrupt
+    OUTPORTB(base_address+1,0x00); // Clear the interrupt.
+    INPORTB(base_address+2);         //Read to enable interrupts. Writing disables
     isr_iiroflag = 0;
     passed = FALSE;
     DELAY(10);
     for(i = 0; i < 8; i++){
       out = out - (1<<i);
-      OUTPORTB(baddress,out); //generate interrupt
+      OUTPORTB(base_address,out); //generate interrupt
       DELAY(1000);
       if (!isr_iiroflag)
         flag++;// passed = TRUE;
@@ -325,9 +317,9 @@ if(df){
       isr_iiroflag = 0;
     }
     GOTOXY( 1, WHEREY() );
-    OUTPORTB(baddress+1,0x00); // Clear the interrupt.
-    OUTPORTB(baddress+2,0x00); //disable interrupt
-    OUTPORTB(baddress+1,0x00); // Clear the interrupt.
+    OUTPORTB(base_address+1,0x00); // Clear the interrupt.
+    OUTPORTB(base_address+2,0x00); //disable interrupt
+    OUTPORTB(base_address+1,0x00); // Clear the interrupt.
     sendEOI();                 //clear interrupt to allow next one
     restoreirq(IRQNumber);
   }
@@ -341,7 +333,7 @@ return flag;
 /*****************************************************************************
  *  FUNCTION: relay_step_test -- local routine                               *
  *****************************************************************************/
-unsigned int relay_step_test(unsigned int baddress,int df)
+unsigned int relay_step_test(unsigned int base_address,int df)
 {
 
   unsigned int  passed,read_in;
@@ -358,9 +350,9 @@ unsigned int relay_step_test(unsigned int baddress,int df)
   read_in = TRUE;
   passed = TRUE;
   /* Test to see if board can be written to at all. */
-  OUTPORTB(baddress,0x00);
+  OUTPORTB(base_address,0x00);
   DELAY(5);
-  outbyte = INPORTB(baddress);
+  outbyte = INPORTB(base_address);
   if(df){
     TEXT_COLOR(LIGHTGRAY);
     CPRINTF("RELAY STEP TEST\n\r");
@@ -373,11 +365,11 @@ unsigned int relay_step_test(unsigned int baddress,int df)
     for(shiftnum = 0; shiftnum < 8; shiftnum++)
     {
         outbyte = 1 << shiftnum;
-        OUTPORTB(baddress,outbyte);      //write to each bit
+        OUTPORTB(base_address,outbyte);      //write to each bit
         DELAY(5);
-        dataarray2[shiftnum] = INPORTB(baddress); // Read relay outputs.
+        dataarray2[shiftnum] = INPORTB(base_address); // Read relay outputs.
         DELAY(10);
-        dataarray[shiftnum] = INPORTB(baddress+1);  // Read isolated inputs.
+        dataarray[shiftnum] = INPORTB(base_address+1);  // Read isolated inputs.
         if(df)
         {
           TEXT_COLOR((dataarray[shiftnum]==dataarray2[shiftnum])?GREEN:RED);
@@ -397,7 +389,7 @@ unsigned int relay_step_test(unsigned int baddress,int df)
  *  FUNCTION: relay_write_test -- local routine                              *
  *****************************************************************************/
 
-unsigned int relay_write_test(unsigned int baddress,int df)
+unsigned int relay_write_test(unsigned int base_address,int df)
 {
   unsigned int       passed,readback;
   int 	      count;
@@ -409,13 +401,13 @@ unsigned int relay_write_test(unsigned int baddress,int df)
   passed = TRUE;
   readback = 0;
 
-  OUTPORTB(baddress+2,0x00);  //disable interrupts
+  OUTPORTB(base_address+2,0x00);  //disable interrupts
 
   /* Start test. First, clear the output relays. */
 
-  OUTPORTB(baddress,0x00);         /* Clear all output relays */
+  OUTPORTB(base_address,0x00);         /* Clear all output relays */
   DELAY(5);		       /* Standard 5 millisecond delay */
-  readback = INPORTB(baddress);    /* Read back the relays */
+  readback = INPORTB(base_address);    /* Read back the relays */
 
   if (readback)
   {
@@ -426,9 +418,9 @@ unsigned int relay_write_test(unsigned int baddress,int df)
       CPRINTF("Results : %u\n\r",readback);
     }
   }
-  OUTPORTB(baddress,0xFF); //Write 0xFF
+  OUTPORTB(base_address,0xFF); //Write 0xFF
   DELAY(5);
-  readback = INPORTB(baddress);
+  readback = INPORTB(base_address);
   if (readback != 0xFF)
   {
      passed = FALSE;

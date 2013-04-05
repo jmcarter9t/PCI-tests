@@ -2,25 +2,15 @@
 #include "io.h"
 #include "data_types.h"
 #include "common_objects.h"
+#include "irq.h"
 
-#include "irq0_15.h"
-
-
-unsigned int baseadd;
-unsigned int iiro16_isr_iiroflag;
-
-void interrupt iiro16_setiiroflag(void)
-{
-  iiro16_isr_iiroflag = 1;        /* indicate an interrupt has occurred */
-  OUTPORTB(baseadd+1,0x00);
-  sendEOI();
-}   /* end setiiroflag */
 
 
 /*****************************************************************************
  *  FUNCTION: soft_filter_test -- local routine                              *
  *****************************************************************************/
-unsigned int iiro16_soft_filter_test(unsigned int base_address,int df, unsigned char RelayOffset)
+unsigned int 
+iiro16_soft_filter_test(unsigned int base_address,int df, unsigned char RelayOffset)
 {
   char          ch, *valstring;
   unsigned int  failed;
@@ -166,7 +156,6 @@ unsigned int iiro16_interrupt_test(unsigned int base_address, unsigned int IRQNu
       iiro16_isr_iiroflag = 0;
       DELAY(10);
       GOTOXY( 3, WHEREY() );
-      // GOTOXY( 3 , (stdscr)->_cury );
       for(i = 0; i < 8; i++){
         out = out - (1<<i);
         OUTPORTB(base_address + RelayOffset,out); //generate interrupt

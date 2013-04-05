@@ -1,4 +1,8 @@
-#include "irq0_15.h"
+#include "irq.h"
+
+unsigned int baseadd;
+unsigned int iiro16_isr_iiroflag;
+
 
 // kills the current interrupt, no matter where it is
 void sendEOI(void)
@@ -30,3 +34,15 @@ void restoreirq(char IRQnumber, unsigned char OldMask)
 
 }
 
+void interrupt iiro16_setiiroflag(void)
+{
+  iiro16_isr_iiroflag = 1;
+  /* OUTPORTB(baseadd+1,0x00); */
+  /* sendEOI(); */
+}
+
+
+void interrupt setiiroflag(void)
+{
+
+}

@@ -5,6 +5,8 @@
 #include "display.h"
 #include "io.h"
 #include "common_objects.h"
+#include "irq.h"
+#include "error_codes.h"
 
 
 #include <time.h>
@@ -25,26 +27,6 @@
 #include "dac.h"
 #include "ai.h"
 #include "idiido.h"
-#include "irq0_15.h"
-#include "error_codes.h"
-
-
-
-
-#ifdef DOS
-void OutPortDW(unsigned Port, unsigned long Value)
-{
-    asm {
-        mov     dx,[Port]
-        mov     eax,[Value]
-        out     dx,eax
-    }
-}
-#elsif LINUX
-
-
-#endif
-
 
 
 void OTHERINFO()
@@ -83,103 +65,6 @@ void INTERRUPT setirq96flag(void)
   isr_96flag = 1;        /* indicate an interrupt has occurred */
 }   /* end setiiroflag */
 
-
-// int _96bitIRQtest(int base,int irq)
-// {
-//   int ppi,port,bit,bytetowrite,addresstowrite, irqstatus;
-//   base96=base;
-//   puts("\n\rPLEASE REMOVE THE TEST JIG/WRAP PLUGs and press any key to continue.");
-//   GETCH();
-//   initirq( irq, setirq96flag );
-//   /*
-//     0.0 Read COS status register, should be all zeros (no bits were enabled)
-//     1.0 Disable all COS bits
-//     2.0 Walking bit pattern on all 96 bits, counting IRQs (should be zero)
-//     3.0 Enable all COS bits
-//     4.0 Walking bit pattern on all 96 bits, counting IRQs (should be 16)
-//     5.0 Enable some COS bits
-//     6.0 walking bit pattern on all 96 bits, counting IRQs (should be some)
-//   */
-//   //walking on 96
-//   OUTPORTB(base+0,0);
-//   OUTPORTB(base+1,0);
-//   OUTPORTB(base+2,0);
-//   OUTPORTB(base+4,0);
-//   OUTPORTB(base+5,0);
-//   OUTPORTB(base+6,0);
-//   OUTPORTB(base+8,0);
-//   OUTPORTB(base+9,0);
-//   OUTPORTB(base+0xa,0);
-//   OUTPORTB(base+0xc,0);
-//   OUTPORTB(base+0xd,0);
-//   OUTPORTB(base+0xe,0);
-
-//   if (INPORT(base+0x10) != 0x0000)
-//     puts("Error, unexpected IRQ status - power on enabled??");
-//   OUTPORT(base+0x12,0x0000);//disable all COS IRQs
-//   puts("COS disabled");
-
-//   OUTPORTB(base+3,0x80);
-//   OUTPORTB(base+7,0x80);
-//   OUTPORTB(base+0x0B,0x80);
-//   OUTPORTB(base+0x0F,0x80);
-
-//   puts("Walking bit, should get no IRQs");
-//   for (ppi=0;ppi<4;ppi++)
-//     for (port=0;port<3;port++)
-//       for (bit=-1;bit<9;bit++)
-//       {
-//         if ((bit == -1) || (bit == 8))  //start with "0", and end with "0"
-//           bytetowrite = 0;
-//         else
-//           bytetowrite = (1 << bit);
-//         addresstowrite = base + (ppi * 4) + port;
-
-//         isr_96flag=0;
-//         OUTPORTB(addresstowrite,bytetowrite);
-
-//         DELAY(1);
-//         if (isr_96flag)
-//         {
-//           printf("BAD!! IRQ on PPI %d, port %d, bit %d\n\r",ppi,port,bit);
-//           return 1;
-//         }
-//       }
-//   irqstatus = INPORT(base+0x10);
-//   if ( irqstatus != 0x0000)
-//     printf("\n\rError, unexpected IRQ status %04x should be 0000\n\r",irqstatus);
-
-//   OUTPORT(base+0x12,0xffff);//enable all COS IRQs
-//   puts("COS enabled all bits (16 total)");
-//   puts("Walking bit, should get 1 IRQ each on all PPIs, port 2 bits 4-7");
-//   for (ppi=0;ppi<4;ppi++)
-//     for (port=0;port<3;port++)
-//       for (bit=-1;bit<9;bit++)
-//       {
-//         if ((bit == -1) || (bit == 8))  //start with "0", and end with "0"
-//           bytetowrite = 0;
-//         else
-//           bytetowrite = (1 << bit);
-//         addresstowrite = base + (ppi * 4) + port;
-
-//         isr_96flag=0;
-//         OUTPORTB(addresstowrite,bytetowrite);
-
-//         DELAY(1);
-//         if ((isr_96flag) && (bit != 8))  //don't both showing the falling edge
-//           printf("IRQ on PPI %d, port %d, bit %d\n\r",ppi,port,bit);
-//       }
-//   irqstatus = INPORT(base+0x10);
-
-//   OUTPORT(base+0x12,0x0000);
-//   OUTPORTB(base+3,0x9b);
-//   OUTPORTB(base+7,0x9b);
-//   OUTPORTB(base+0x0B,0x9b);
-//   OUTPORTB(base+0x0F,0x9b);
-
-//   restoreirq(irq);
-//   return 0;
-// }
 
 void pci_IIRO(char *name)
 {

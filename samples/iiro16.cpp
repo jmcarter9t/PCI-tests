@@ -21,8 +21,10 @@ main(int argc, char *argv[])
   int base_address = 0xd000;
   int relayoffset;
   unsigned char RelayOffset = 8;
+  int index;
   CLRSCR();
   IOPermissions();
+
   GLOBALS.result = read_configuration_word(GLOBALS.bn,GLOBALS.df,GLOBALS.regnum = 0x14,&GLOBALS.basea); //enable IRQ generation
   GLOBALS.basea &= 0xFFFE;
   OUTPORTB(GLOBALS.basea+0x69,0x09);
@@ -32,10 +34,6 @@ main(int argc, char *argv[])
   GLOBALS.basea  &=  0xFFFE;
   GLOBALS.result += read_configuration_word(GLOBALS.bn, GLOBALS.df, GLOBALS.regnum = 0x3C, &GLOBALS.irqnum);
   GLOBALS.irqnum  &=  0xF;
-
-
-
-
 
   GLOBALS.result = read_configuration_word(GLOBALS.bn,GLOBALS.df,GLOBALS.regnum = 0x14,&GLOBALS.basea); //enable IRQ generation
   GLOBALS.basea &= 0xFFFE;
@@ -69,19 +67,19 @@ main(int argc, char *argv[])
         CPRINTF("Press any key to start test.\n\r");
         GETCH();
 
-        // GLOBALS.result = iiro16_relay_write_test(GLOBALS.basea,GLOBALS.DebugFlag, RelayOffset);
-        // TEXT_COLOR(GLOBALS.result?RED:GREEN);
-        // CPRINTF("      Relay Write Test: %47s\n\r",GLOBALS.result?"FAILED":"PASSED");
+        GLOBALS.result = iiro16_relay_write_test(GLOBALS.basea,GLOBALS.DebugFlag, RelayOffset);
+        TEXT_COLOR(GLOBALS.result?RED:GREEN);
+        CPRINTF("      Relay Write Test: %47s\n\r",GLOBALS.result?"FAILED":"PASSED");
 
-        // GLOBALS.result = iiro16_relay_step_test(GLOBALS.basea,GLOBALS.DebugFlag, RelayOffset);
-        // TEXT_COLOR(GLOBALS.result?RED:GREEN);
-        // CPRINTF("      Relay Step Test: %48s\n\r",GLOBALS.result?"FAILED":"PASSED");
+        GLOBALS.result = iiro16_relay_step_test(GLOBALS.basea,GLOBALS.DebugFlag, RelayOffset);
+        TEXT_COLOR(GLOBALS.result?RED:GREEN);
+        CPRINTF("      Relay Step Test: %48s\n\r",GLOBALS.result?"FAILED":"PASSED");
 
-        // GLOBALS.result = iiro16_soft_filter_test(GLOBALS.basea,GLOBALS.DebugFlag, RelayOffset);
-        // TEXT_COLOR(GLOBALS.result?RED:GREEN);
-        // CPRINTF("      Software Filter Test: %43s\n\r",GLOBALS.result?"FAILED":"PASSED");
+        GLOBALS.result = iiro16_soft_filter_test(GLOBALS.basea,GLOBALS.DebugFlag, RelayOffset);
+        TEXT_COLOR(GLOBALS.result?RED:GREEN);
+        CPRINTF("      Software Filter Test: %43s\n\r",GLOBALS.result?"FAILED":"PASSED");
 
-        GLOBALS.result = iiro16_interrupt_test(GLOBALS.basea,GLOBALS.irqnum,GLOBALS.DebugFlag, RelayOffset);
+        GLOBALS.result = iiro16_interrupt_test(GLOBALS.basea,GLOBALS.irqnum, 0 , RelayOffset);
         TEXT_COLOR(GLOBALS.result?RED:GREEN);
         CPRINTF("      Interrupt Test: %49s\n\r",GLOBALS.result?"FAILED":"PASSED");
 
