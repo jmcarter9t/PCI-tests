@@ -18,7 +18,9 @@
 int
 main(int argc, char *argv[])
 {
-  int base_address = 0xd100;
+  // int base_address = 0xd100;
+  
+
   int relayoffset;
   unsigned char RelayOffset = 8;
   int index;
@@ -61,21 +63,21 @@ main(int argc, char *argv[])
     TEXT_COLOR(GLOBALS.result?RED:GREEN);
     CPRINTF("BASE:%04X  IRQ:%hu%40s\n\r",GLOBALS.basea, GLOBALS.irqnum, GLOBALS.result?"FAILED":"PASSED");
 
-    GLOBALS.result = relay_write_test(GLOBALS.basea,GLOBALS.DebugFlag);
-    TEXT_COLOR(GLOBALS.result?RED:GREEN);
-    CPRINTF("      Relay Write Test: %47s\n\r",GLOBALS.result?"FAILED":"PASSED");
+    // GLOBALS.result = relay_write_test(GLOBALS.basea,GLOBALS.DebugFlag);
+    // TEXT_COLOR(GLOBALS.result?RED:GREEN);
+    // CPRINTF("      Relay Write Test: %47s\n\r",GLOBALS.result?"FAILED":"PASSED");
 
-    GLOBALS.result = relay_step_test(GLOBALS.basea,GLOBALS.DebugFlag);
-    TEXT_COLOR(GLOBALS.result?RED:GREEN);
-    CPRINTF("      Relay Step Test: %48s\n\r",GLOBALS.result?"FAILED":"PASSED");
+    // GLOBALS.result = relay_step_test(GLOBALS.basea,GLOBALS.DebugFlag);
+    // TEXT_COLOR(GLOBALS.result?RED:GREEN);
+    // CPRINTF("      Relay Step Test: %48s\n\r",GLOBALS.result?"FAILED":"PASSED");
 
-    GLOBALS.result = soft_filter_test(GLOBALS.basea,GLOBALS.DebugFlag);
-    TEXT_COLOR(GLOBALS.result?RED:GREEN);
-    CPRINTF("      Software Filter Test: %43s\n\r",GLOBALS.result?"FAILED":"PASSED");
+    // GLOBALS.result = soft_filter_test(GLOBALS.basea,GLOBALS.DebugFlag);
+    // TEXT_COLOR(GLOBALS.result?RED:GREEN);
+    // CPRINTF("      Software Filter Test: %43s\n\r",GLOBALS.result?"FAILED":"PASSED");
 
-    GLOBALS.result = manual_filter_test(GLOBALS.basea,GLOBALS.DebugFlag);
-    TEXT_COLOR(GLOBALS.result?RED:GREEN);
-    CPRINTF("      Manual Filter Test: %45s\n\r",GLOBALS.result?"FAILED":"PASSED");
+    // GLOBALS.result = manual_filter_test(GLOBALS.basea,GLOBALS.DebugFlag);
+    // TEXT_COLOR(GLOBALS.result?RED:GREEN);
+    // CPRINTF("      Manual Filter Test: %45s\n\r",GLOBALS.result?"FAILED":"PASSED");
 
     GLOBALS.result = interrupt_test(GLOBALS.basea,GLOBALS.irqnum,GLOBALS.DebugFlag);
     TEXT_COLOR(GLOBALS.result?RED:GREEN);

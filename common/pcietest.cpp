@@ -187,79 +187,81 @@ void ShowHelp(void)
 
 int main(int argc, char *argv[])
 {
-  unsigned short IDIAddr = 0, IDOAddr = 0;
-  unsigned char IDIIRQ;
-  unsigned short i;
+     unsigned short IDIAddr = 0, IDOAddr = 0;
+     unsigned char IDIIRQ;
+     unsigned short i;
 
-  int bIDOverflow = FALSE, bIDIMini = FALSE, bIDOMini = FALSE;
-  unsigned int numcards = GLOBALS.list_size;
+     int bIDOverflow = FALSE, bIDIMini = FALSE, bIDOMini = FALSE;
+     unsigned int numcards = GLOBALS.list_size;
 // (sizeof( struct TCardList ));
-  for (i=0;i<argc;i++){
-    if (!strcmp(argv[i],"/?")) ShowHelp();
-    if (!strcmp(argv[i],"/help")) ShowHelp();
-    if (!strcmp(argv[i],"/d")) GLOBALS.df=TRUE;
-   // if (!strcmp(arg[i],"/t")) GLOBALS.df=4;  //for software test
+     for (i=0;i<argc;i++){
+          if (!strcmp(argv[i],"/?")) ShowHelp();
+          if (!strcmp(argv[i],"/help")) ShowHelp();
+          if (!strcmp(argv[i],"/d")) GLOBALS.df=TRUE;
+          // if (!strcmp(arg[i],"/t")) GLOBALS.df=4;  //for software test
 
-  }
+     }
 
-  GLOBALS.DebugFlag=GLOBALS.df;//LoadParamsFromCommandLine(argc, *arg);
+     GLOBALS.DebugFlag=GLOBALS.df; //LoadParamsFromCommandLine(argc, *arg);
 
-  CLRSCR();
-  TEXT_COLOR(LIGHTGRAY);
-  printf("PCIeTest 0.30");if (GLOBALS.df) printf(" running in DEBUG mode.");
-  printf("\n");
-  GLOBALS.result = !pci_bios_present(&GLOBALS.h,&i,&GLOBALS.bn);
-  if (GLOBALS.result){
-    PRINTF("Number of PCI Busses Present: %u\n\r",GLOBALS.bn+1);
-    i=0;
-    do{
-      if( find_pci_device( list[i].dev, 0x494f, GLOBALS.indexvalue ,&GLOBALS.bn, &GLOBALS.df )==SUCCESSFUL){
-        if (GLOBALS.foundcount>0) {
-          puts("Please press any key to view the next card's information.");
-          GETCH();
-          CLRSCR();
-          printf("PCIeTest 0.30");if (GLOBALS.df) printf(" running in DEBUG mode.");
-          printf("\n");
-        }
-        switch(list[i].type){
+     CLRSCR();
+     TEXT_COLOR(LIGHTGRAY);
+     printf("PCIeTest 0.30");if (GLOBALS.df) printf(" running in DEBUG mode.");
+     printf("\n");
+     GLOBALS.result = !pci_bios_present(&GLOBALS.h,&i,&GLOBALS.bn);
+     if (GLOBALS.result){
+          PRINTF("Number of PCI Busses Present: %u\n\r",GLOBALS.bn+1);
+          i=0;
+          do{
+               if( find_pci_device( list[i].dev, 0x494f, GLOBALS.indexvalue ,&GLOBALS.bn, &GLOBALS.df )==SUCCESSFUL){
+                    if (GLOBALS.foundcount>0) {
+                         puts("Please press any key to view the next card's information.");
+                         GETCH();
+                         CLRSCR();
+                         printf("PCIeTest 0.30");if (GLOBALS.df) printf(" running in DEBUG mode.");
+                         printf("\n");
+                    }
+                    switch(list[i].type){
 
-        case IIRO8:         
-          pci_IIRO( list[i].cn );
-          break;
-        case IIRO16:        
-          pci_IIRO16( list[i].cn );
-          break;
-        default:
-          printf("The %lx device detected is not recognized by this program.\n"
-                 "It is either newer than this program, or provided by some other\n"
-                 "vendor.  Please get the latest version of PCIeTest, and retry.\n",GLOBALS.vendev);
-          GLOBALS.foundcount--;
-          break;
-        }
-        GLOBALS.foundcount ++;
-        GLOBALS.indexvalue ++;
-      } else {
-        i++;
-        GLOBALS.indexvalue = 0;
-      }
-    } while(i<numcards);
+                    case IIRO8:         
+                         pci_IIRO( list[i].cn );
+                         break;
+                    case IIRO16:        
+                         pci_IIRO16( list[i].cn );
+                         break;
+                    default:
+                         printf("The %lx device detected is not recognized by this program.\n"
+                                "It is either newer than this program, or provided by some other\n"
+                                "vendor.  Please get the latest version of PCIeTest, and retry.\n",GLOBALS.vendev);
+                         GLOBALS.foundcount--;
+                         break;
+                    }
+                    GLOBALS.foundcount ++;
+                    GLOBALS.indexvalue ++;
+               } else {
+                    i++;
+                    GLOBALS.indexvalue = 0;
+               }
+          } while(i<numcards);
 
-    TEXT_COLOR(LIGHTGRAY);
+          TEXT_COLOR(LIGHTGRAY);
 
-    if (GLOBALS.foundcount) {
-      if (GLOBALS.foundcount>1)
-        PRINTF("A total of %d cards have been found.\r\n",GLOBALS.foundcount);
-      else
-        PRINTF("\r\nOne card was found.\r\n");
-    } else {
-      PRINTF("None of the PCI cards under consideration have been found.\r\nMake sure your card is installed.\r\n");
-      if( find_pci_device(0x9050,0x10b5,0,&GLOBALS.bn,&GLOBALS.df)==SUCCESSFUL) PRINTF("A PLX 9050 card *was* found.\r\n");
-      if( find_pci_device(0x9030,0x10b5,0,&GLOBALS.bn,&GLOBALS.df)==SUCCESSFUL) PRINTF("A PLX 9030 card *was* found.\r\n");
-    }
-  } else {
-    PRINTF("No PCI Bus compliant BIOS was found!\r\n");
-  }
-  PRINTF("Exiting.\r\n");
-  ENDWIN();
-  return 0;
+          if (GLOBALS.foundcount) {
+               if (GLOBALS.foundcount>1)
+                    PRINTF("A total of %d cards have been found.\r\n",GLOBALS.foundcount);
+               else
+                    PRINTF("\r\nOne card was found.\r\n");
+          } else {
+               PRINTF("None of the PCI cards under consideration have been found.\r\nMake sure your card is installed.\r\n");
+               if( find_pci_device(0x9050,0x10b5,0,&GLOBALS.bn,&GLOBALS.df)==SUCCESSFUL) 
+                    PRINTF("A PLX 9050 card *was* found.\r\n");
+               if( find_pci_device(0x9030,0x10b5,0,&GLOBALS.bn,&GLOBALS.df)==SUCCESSFUL) 
+                    PRINTF("A PLX 9030 card *was* found.\r\n");
+          }
+     } else {
+          PRINTF("No PCI Bus compliant BIOS was found!\r\n");
+     }
+     PRINTF("Exiting.\r\n");
+     ENDWIN();
+     return 0;
 }
