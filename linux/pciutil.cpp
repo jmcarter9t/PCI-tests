@@ -107,6 +107,17 @@ int pci_bios_present(byte *hardware_mechanism,
    return (ret_status);
 }
 
+void IOPermission(unsigned abase){
+    if(ioperm(abase,8,1)<0)
+    {
+      TEXT_COLOR(RED);
+      CPRINTF("NO IO PERMISSION\n");
+      ENDWIN();
+      _exit(1);
+    }//if
+}//IOPermission
+
+
 
 /****************************************************************************/
 /*                                                                          */

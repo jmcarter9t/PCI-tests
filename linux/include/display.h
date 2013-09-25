@@ -2,6 +2,7 @@
 #define DISPLAY_H
 
 #include <ncurses.h>
+#include <string.h>
 #include <sys/io.h>
 #include <unistd.h>
 #include <ctype.h>
@@ -13,11 +14,16 @@
 #define TEXT_COLOR(x) attron(COLOR_PAIR(x)); _color_display = x; 
 #define GETC  getchar
 #define GETCH getch
-#define PUTS  puts
+/* #define PUTS  puts */
+#define PUTS(...) printw( __VA_ARGS__ ); printw("\n"); refresh();
+/* #define GETS(s) fgets(s,strlen(s)-1,stdin) */
+#define GETS(s)  getstr(s)
 #define GOTOXY(x,y)  move(y,x)
 #define WHEREY()  getcury(stdscr)
+#define WHEREX()  getcurx(stdscr)
 #define ENDWIN()  sleep(2); endwin();
 #define ENDTEST() sleep(3); endwin();
+#define CLREOL()  CLRSCR()
 
 #define RESETLINE(); (--stdscr->_cury);
 
