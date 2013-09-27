@@ -79,6 +79,9 @@ link_directories (${LIB_DIR}/test_utilities)
   set(CORELIBS ${CMAKE_THREAD_LIBS_INIT} ${CURSES_LIBRARY} test_utilities)
 endif(UNIX)
 
+add_executable( pci_da12_waveforms ${SAMPLES_DIR}/pci_da12_waveforms.cpp )
+target_link_libraries( pci_da12_waveforms ${CORELIBS} curses)
+
 add_executable( pci_da12_basic ${SAMPLES_DIR}/pci_da12_basic.cpp )
 target_link_libraries( pci_da12_basic ${CORELIBS} curses)
 

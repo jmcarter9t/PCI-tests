@@ -18,6 +18,7 @@
 #define PUTS(...) printw( __VA_ARGS__ ); printw("\n"); refresh();
 /* #define GETS(s) fgets(s,strlen(s)-1,stdin) */
 #define GETS(s)  getstr(s)
+#define SCANF(...) scanw( __VA_ARGS__ )
 #define GOTOXY(x,y)  move(y,x)
 #define WHEREY()  getcury(stdscr)
 #define WHEREX()  getcurx(stdscr)
@@ -39,7 +40,8 @@ init_pair( 4 , COLOR_BLUE      , COLOR_BLACK );\
 init_pair( 5 , COLOR_MAGENTA   , COLOR_BLACK );\
 init_pair( 6 , COLOR_CYAN      , COLOR_BLACK );\
 init_pair( 7 , COLOR_WHITE     , COLOR_BLACK );\
-refresh();
+refresh(); \
+clear();
 
 #define KBHIT()  kbhit()
 

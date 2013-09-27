@@ -11,4 +11,5 @@ int kbhit(void)
   } else {
     return 0;
   }
+  nodelay(stdscr,0 );
 }

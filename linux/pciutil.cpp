@@ -108,7 +108,7 @@ int pci_bios_present(byte *hardware_mechanism,
 }
 
 void IOPermission(unsigned abase){
-    if(ioperm(abase,8,1)<0)
+    if(ioperm(abase,0xff0,1) < 0)
     {
       TEXT_COLOR(RED);
       CPRINTF("NO IO PERMISSION\n");

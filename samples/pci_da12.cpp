@@ -1,3 +1,8 @@
+/****************************************************************************
+ *  This sample will prompt the user for a voltage between 0 and 10 volts,  *
+ *  then calculate the actual voltage based on the resolution of the DAC and*
+ *  output the voltage to the desired DAC channel.                          *
+ ****************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/io.h>
@@ -10,126 +15,161 @@
 #include "common_objects.h"
 #include "display.h"
 #include "io.h"
+#include "iiro8.h"
 #include "pciutil.h"
-#include "8254ctr.h"
-/* #include <dos.h> */
-/* #include <conio.h> */
-/* #include "8254ctr.h" */
-/* #include <stdio.h> */
+
+/* Global card base address */
+unsigned base, EBase;
+
+/****************************************************************************
+ *                                                                          *
+ *  FUNCTION: Cal                                                           *
+ *                                                                          *
+ *   PURPOSE: Calibrate                                                     *
+ *                                                                          *
+ *   INPUT: Value and channel                                               *
+ *                                                                          *
+ *   OUTPUT: Calibrated value                                               *
+ *                                                                          *
+ ****************************************************************************/
+unsigned Cal(unsigned InValue, unsigned Ch)
+{
+   char a, b;
+   unsigned OutValue;
+   unsigned  offset = 0xf0;
+   int temp = (Ch * 2) + INPORTB(EBase + offset + Ch)*32;
+   a = INPORTB(EBase + ((Ch * 2) + (INPORTB(EBase + 240 + Ch) * 32)) + 1);
+   b = INPORTB(EBase + ((Ch * 2) + (INPORTB(EBase + 240 + Ch) * 32)));
+   OutValue = ((4095.0 - a - b) / 4095.0) * InValue + b;
+   return OutValue;
+}
+
+/****************************************************************************
+ *  FUNCTION: write_DAC() - local routine                                   *
+ *  PURPOSE: Prompts the user for DAC number and voltage, then calculates  *
+ *            the actual output voltage based on resolution, displays it    *
+ *            and writes the value to the DAC.                              *
+ ****************************************************************************/
+void write_DAC(void)
+{
+float           volt_value_entered,volt_value_expected;
+unsigned        counts_entered,dac_number;
+
+/* prompt for the DAC number and desire voltage. */
+CPRINTF("Enter the DAC number (0 through 15 only)\n: ");
+scanf("%u",&dac_number);
+CPRINTF("\n\nEnter a voltage between 0.000v to 9.997v\n: ");
+scanf("%f",&volt_value_entered);
+
+/* convert entered voltage to associated number of DAC counts. Scale
+   factor for 12 bit resolution of DA12-16 is 0.002442. */
+volt_value_entered /= 0.002442;
+
+/* compute the digital output needed for this value and the actual voltage
+   that will be expected, and display the voltage. */
+
+counts_entered=(int) volt_value_entered;
+volt_value_expected = (float) counts_entered * 0.002442;
+CPRINTF("\nDue to the 12-bit resolution of the DAC, you should expect\n");
+CPRINTF("to see a voltage of %4.3f.",volt_value_expected);
+
+/* write to the DAC */
+OUTPORT(base + (2 * dac_number), Cal(counts_entered, dac_number)); /* write low byte      */
+
+} /* end write_DAC */
 
 
-unsigned AskForBaseAddress(unsigned int OldOne)
+/***************************************************************************
+ * FUNCTION: AskForBaseAddress                                             *
+ * PURPOSE: Prompt user to enter base address for their I/O card.          *
+ **************************************************************************/
+unsigned AskForBaseAddress(unsigned int OldOne, char *TypeString)
 {
 	char msg[7];
 	int NewOne = 0, Success = 0, Dummy;
 	int AddrInputPosX, AddrInputPosY;
 
-	CPRINTF("Please enter the Base Address for your card (in hex)");
+	CPRINTF("\nPlease enter the %sBase Address for your card (in hex)\n", TypeString);
 	CPRINTF("or press ENTER for %X.\n>", OldOne);
 	AddrInputPosX = WHEREX(); AddrInputPosY = WHEREY();
 	do {
-		GOTOXY(AddrInputPosX, AddrInputPosY);
-		CLREOL();
-		msg[0] = 5; msg[1] = 0;
-		GETS(msg);
-		sscanf(msg + 2, "%x", &NewOne);
-                // GETS(msg)
-                IOPermission(NewOne);
-		Success = 1;
-		Dummy = NewOne;
+      GOTOXY(AddrInputPosX, AddrInputPosY);
+      CLREOL();
+      msg[0] = 5; msg[1] = 0;
+      GETS(msg);
+      sscanf(msg + 2, "%x", &NewOne);
+      IOPermission(NewOne);
+
+      Success = 1;
+      Dummy = NewOne;
 		if (msg[1] == 0) {
-			GOTOXY(AddrInputPosX, AddrInputPosY);
-			printf("%X", OldOne);
-			Success = 1;
-			Dummy = OldOne;
-		}
+	GOTOXY(AddrInputPosX, AddrInputPosY);
+	CPRINTF("%X", OldOne);
+	Success = 1;
+	Dummy = OldOne;
+      }
 	} while(!Success);
 	return (Dummy);
 } /* end of AskForBaseAddress */
 
-unsigned AskForCountAddress(void)
-{
-	char msg[7];
-	int NewOne = 0, Success = 0, Dummy;
-	int AddrInputPosX, AddrInputPosY;
 
-	CPRINTF("Please enter the offset for Counter 0 for your card (in hex).");
-	printf(">");
-	AddrInputPosX = WHEREX(); AddrInputPosY = WHEREY();
-	do {     
-		GOTOXY(AddrInputPosX, AddrInputPosY);
-		CLREOL();
-		msg[0] = 5; msg[1] = 0;
-		GETS(msg);
-		sscanf(msg + 2, "%x", &NewOne);
-		Success = 1;
-		Dummy = NewOne;
-	} while(!Success);
-	return (Dummy);
-} /* end of AskForCountAddress */
+/***************************************************************************
+ * FUNCTION: intro                                                         *
+ * PURPOSE: Present user with introductory screen. Get base address.       *
+ **************************************************************************/
+void intro(void)
+   {
+   CLRSCR();
+   CPRINTF(
+   "                        C SAMPLE #1: SAMPLE1.C                          \n\n"
+   "  This sample will prompt the user for a voltage between 0 and 10 volts,  \n"
+   "  then calculate the actual voltage based on the resolution of the DAC and\n"
+   "  output the voltage to the desired DAC channel.                        \n\n"
+   "  The following setup of the board is expected:                         \n\n"
+   "        þ All DAC voltage ranges should be set to 0v-10v unipolar.        \n\n");
 
-int main(int argc , char *argv[] )
-{
-	unsigned freq=0;
-	float time = 0;
-	unsigned BASE = 0xFCA0;
-	unsigned count = 0;
+   PUTS("\n");
+   PUTS("Press any key to continue ... ");
+   GETCH();
+   CLRSCR();
+   base = AskForBaseAddress(0x350, "");
+   CLRSCR();
+   EBase = AskForBaseAddress(0x350, "Calibration ");
+   } /* end of intro */
+
+
+/****************************************************************************
+ *  FUNCTION: main() - local routine                                        *
+ ****************************************************************************/
+int main(int argc, char *argv[])
+    {
+    int key_entered, Ch;
+
+    intro();
+
+    /* Set all 16 buffers to 0 */
+    for (Ch = 0; Ch < 4; Ch++)
+	   OUTPORT(base + (Ch * 2), Cal(0x000, Ch));
+
+    inb(base+0xA);    // set automatic update mode
+    inb(base+0XF);    // release zero latch
+
+    do
+	{
 	CLRSCR();
-	BASE=AskForBaseAddress(BASE);
-	CLRSCR();
-	count=AskForCountAddress(); //get counter offset
-	BASE+=count;                //add counter offset to base address
-	DELAY(100);
-	CPRINTF("8254 Counter Sample");
-	CPRINTF("--This program measures frequency and pulse width and generates frequency.");
-	CPRINTF("--To measure frequency, connect a source to Clk IN on Pin 33.");
-	CPRINTF("");
-	CPRINTF("Press any key to continue.");
-	GETCH();
-	while(!KBHIT()){
-	  freq = freq;
-	  time = frequency_measure(BASE);
-	  printf("\nThe frequency is %10.3f\n\n", time);
-	  CPRINTF("Press any key to continue to pulse width test.");
-	  GOTOXY(1,WHEREY()-4);
-	}
-	GETCH();
-	CLRSCR();                //is this correct???
-	CPRINTF("--To measure pulse width, connect a source to Gate 1 on Pin 34.");
-	CPRINTF("--Without a source, pulse width will read zero.");
-	CPRINTF("--Ground Pin 37.");
-	CPRINTF("");
-	CPRINTF("Press any key to continue.");
-	GETCH();
-	while(!KBHIT()){
-	  time = pulse_width(BASE);
-	  printf(" Pulse1 %g \n", time);
-	  DELAY(1000);
-	  time = pulse_width(BASE);
-	  printf(" Pulse2 %g \n", time);
-	  DELAY(397);
-	  time = pulse_width(BASE);
-	  printf(" Pulse3 %g \n", time);
-	  time = pulse_width(BASE);
-	  printf(" Pulse4 %g \n", time);
-	  DELAY(300);
-	  time = pulse_width(BASE);
-	  printf(" Pulse5 %g \n", time);
-	  DELAY(10);
-	  time = pulse_width(BASE);
-	  printf(" Pulse6 %g \n\n", time);
-	  CPRINTF("Press any key to continue to next test.");
-	  GOTOXY(1,WHEREY()-8);
-  }
-  GETCH();
-  CLRSCR();
-  while(!KBHIT()){
-	 CPRINTF("Generating frequency...");
-	 CPRINTF("Verify signal by connecting a frequency meter to Out 2 on Pin 35.");
-	 CPRINTF("Press any key to continue.");
-	 generatefrequency(BASE, 25000);
-	 GOTOXY(1,WHEREY()-3);
-  }
-  GETCH();
-	//DELAY(2000);
-}
+	write_DAC();
+	CPRINTF("\n\nWould you like to output another value (Y or N)?\n");
+	key_entered = GETCH();
+	} while((key_entered != 'N') && (key_entered != 'n'));
+
+    /* Set all 16 buffers to 0 */
+    for (Ch = 0; Ch < 4; Ch++)
+	   OUTPORT(base + (Ch * 2), Cal(0x000, Ch));
+
+    CLRSCR();
+    PUTS("DA12-16 Sample1 complete.");
+    } /* end main */
+
+
+
+
