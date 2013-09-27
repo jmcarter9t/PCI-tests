@@ -24,7 +24,9 @@
 #define WHEREX()  getcurx(stdscr)
 #define ENDWIN()  sleep(2); endwin();
 #define ENDTEST() sleep(3); endwin();
-#define CLREOL()  CLRSCR()
+#define CLREOL()  clrtoeol()
+
+#define ENTER_KEY 0
 
 #define RESETLINE(); (--stdscr->_cury);
 

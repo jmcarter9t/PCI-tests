@@ -82,6 +82,9 @@ endif(UNIX)
 add_executable( pci_da12_waveforms ${SAMPLES_DIR}/pci_da12_waveforms.cpp )
 target_link_libraries( pci_da12_waveforms ${CORELIBS} curses)
 
+add_executable( pci_da12_setvoltages ${SAMPLES_DIR}/pci_da12_setvoltages.cpp )
+target_link_libraries( pci_da12_setvoltages ${CORELIBS} curses)
+
 add_executable( pci_da12_basic ${SAMPLES_DIR}/pci_da12_basic.cpp )
 target_link_libraries( pci_da12_basic ${CORELIBS} curses)
 
