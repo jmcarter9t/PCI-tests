@@ -1,4 +1,4 @@
-void DTRTSTest(unsigned short *base, int index, unsigned char OutByte, unsigned char InNybble, char* TestName);
+void DTRTSTest(unsigned short *base, int index, unsigned char OutByte, unsigned char InNybble, const char* TestName);
 
 int _16450DualTest(unsigned base, unsigned base2,int df);
 int _16450FullDuplex(unsigned base,int df);

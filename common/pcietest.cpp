@@ -28,6 +28,7 @@
 #include "ai.h"
 #include "idiido.h"
 
+void PCIeCOM8S(char *name, int numport, byte F1, byte F2, byte F3);
 
 void OTHERINFO()
 { 
@@ -42,12 +43,12 @@ void OTHERINFO()
   GLOBALS.basec&=0xFFFE;
   GLOBALS.based&=0xFFFE;
   if (!GLOBALS.result){
-    printf("A board has been located.\n");
-    printf("Base Address A= %X\n",GLOBALS.basea);
-    printf("Base Address B= %X\n",GLOBALS.baseb);
-    printf("Base Address C= %X\n",GLOBALS.basec);
-    printf("Base Address D= %X\n",GLOBALS.based);
-    printf("IRQ = %hu\n",GLOBALS.irqnum & 0xF);
+    CPRINTF("A board has been located.\n");
+    CPRINTF("Base Address A= %X\n",GLOBALS.basea);
+    CPRINTF("Base Address B= %X\n",GLOBALS.baseb);
+    CPRINTF("Base Address C= %X\n",GLOBALS.basec);
+    CPRINTF("Base Address D= %X\n",GLOBALS.based);
+    CPRINTF("IRQ = %hu\n",GLOBALS.irqnum & 0xF);
   }
   rn=rn;
 }
@@ -206,11 +207,11 @@ int main(int argc, char *argv[])
 
      CLRSCR();
      TEXT_COLOR(LIGHTGRAY);
-     printf("PCIeTest 0.30");if (GLOBALS.df) printf(" running in DEBUG mode.");
-     printf("\n");
-     GLOBALS.result = !pci_bios_present(&GLOBALS.h,&i,&GLOBALS.bn);
+     CPRINTF("PCIeTest 0.30");if (GLOBALS.df) CPRINTF(" running in DEBUG mode.");
+     CPRINTF("SUCCESSFUL: %d\n",SUCCESSFUL);
+     GLOBALS.result = pci_bios_present(&GLOBALS.h,&i,&GLOBALS.bn);
      if (GLOBALS.result){
-          PRINTF("Number of PCI Busses Present: %u\n\r",GLOBALS.bn+1);
+          CPRINTF("Number of PCI Busses Present: %u\n\r",GLOBALS.bn+1);
           i=0;
           do{
                if( find_pci_device( list[i].dev, 0x494f, GLOBALS.indexvalue ,&GLOBALS.bn, &GLOBALS.df )==SUCCESSFUL){
@@ -218,8 +219,8 @@ int main(int argc, char *argv[])
                          puts("Please press any key to view the next card's information.");
                          GETCH();
                          CLRSCR();
-                         printf("PCIeTest 0.30");if (GLOBALS.df) printf(" running in DEBUG mode.");
-                         printf("\n");
+                         CPRINTF("PCIeTest 0.30");if (GLOBALS.df) CPRINTF(" running in DEBUG mode.");
+                         CPRINTF("\n");
                     }
                     switch(list[i].type){
 
@@ -229,8 +230,11 @@ int main(int argc, char *argv[])
                     case IIRO16:        
                          pci_IIRO16( list[i].cn );
                          break;
+                    case PericomCOM8S:
+                      PCIeCOM8S(list[i].cn,list[i].n,list[i].f1,list[i].f2,list[i].f3);
+                      break;
                     default:
-                         printf("The %lx device detected is not recognized by this program.\n"
+                         CPRINTF("The %lx device detected is not recognized by this program.\n"
                                 "It is either newer than this program, or provided by some other\n"
                                 "vendor.  Please get the latest version of PCIeTest, and retry.\n",GLOBALS.vendev);
                          GLOBALS.foundcount--;
@@ -248,20 +252,22 @@ int main(int argc, char *argv[])
 
           if (GLOBALS.foundcount) {
                if (GLOBALS.foundcount>1)
-                    PRINTF("A total of %d cards have been found.\r\n",GLOBALS.foundcount);
+                 PRINTF("A total of %d cards have been found.\n",GLOBALS.foundcount);
                else
-                    PRINTF("\r\nOne card was found.\r\n");
+                 PRINTF("\nOne card was found.\n");
           } else {
-               PRINTF("None of the PCI cards under consideration have been found.\r\nMake sure your card is installed.\r\n");
+               PRINTF("None of the PCI cards under consideration have been found.\nMake sure your card is installed.\n");
                if( find_pci_device(0x9050,0x10b5,0,&GLOBALS.bn,&GLOBALS.df)==SUCCESSFUL) 
-                    PRINTF("A PLX 9050 card *was* found.\r\n");
+                    PRINTF("A PLX 9050 card *was* found.\n");
                if( find_pci_device(0x9030,0x10b5,0,&GLOBALS.bn,&GLOBALS.df)==SUCCESSFUL) 
-                    PRINTF("A PLX 9030 card *was* found.\r\n");
+                    PRINTF("A PLX 9030 card *was* found.\n");
           }
      } else {
-          PRINTF("No PCI Bus compliant BIOS was found!\r\n");
+          PRINTF("No PCI Bus compliant BIOS was found!\n");
      }
-     PRINTF("Exiting.\r\n");
+     PRINTF("Exiting.\n");
      ENDWIN();
      return 0;
 }
+
+

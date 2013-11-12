@@ -14,10 +14,15 @@
 #define GETC  getchar
 #define GETCH getch
 #define PUTS  puts
+#define PUTCH ungetch
 #define GOTOXY(x,y)  move(y,x)
 #define WHEREY()  getcury(stdscr)
+#define WHEREX()  getcurx(stdscr)
 #define ENDWIN()  sleep(2); endwin();
 #define ENDTEST() sleep(3); endwin();
+#define TEXTATTR(x) attron(x)
+#define TEXTBACKGROUND(x) {}
+#define WINDOW(h,w,sty,stx) newwin(h,w,sty,stx)
 
 #define RESETLINE(); (--stdscr->_cury);
 
@@ -52,5 +57,6 @@ extern int _color_display;
 #define RED     COLOR_RED
 #define WHITE   COLOR_WHITE
 #define YELLOW  COLOR_YELLOW
+#define BLACK   COLOR_BLACK
 
 #endif

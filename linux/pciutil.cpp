@@ -41,7 +41,8 @@
 #include <stddef.h>
 #include "pciutil.h"
 #include "display.h"
-
+#include <string.h>
+#include <unistd.h>
 
 static int read_configuration_area(byte function,
 				   byte bus_number,
@@ -100,7 +101,7 @@ int pci_bios_present(byte *hardware_mechanism,
 			    word *interface_level_version,
 			    byte *last_pci_bus_number)
 {
-   int ret_status;          /* Function Return Status. */
+   int ret_status = 1;          /* Function Return Status. */
    byte bios_present_status;/* Indicates if PCI bios present */
    dword pci_signature;     /* PCI Signature ('P', 'C', 'I', ' ') */
    word ax, bx, cx, flags;  /* Temporary variables to hold register values */
@@ -148,9 +149,36 @@ int find_pci_device(word device_id,
 		    byte *bus_number,
 		    byte *device_and_function)
 {
-   int ret_status;     /* Function Return Status */
+   int ret_status = NOT_SUCCESSFUL;     /* Function Return Status */
    word ax, bx, flags; /* Temporary variables to hold register values */
-   
+   FILE *fp;
+   char *tmpfile = tempnam(".", "pcifindXXX");
+   char cmd[100];
+   char buf[BUFSIZ];
+   char *pos;
+   sprintf(cmd,"lspci -nn -d %x:%x > %s", vendor_id,device_id, tmpfile);
+   system(cmd);                 // Create the file
+   if( !(fp = fopen(tmpfile,"r")) ) {
+     CPRINTF("Error, Can't read PCI device" );
+     goto out_find_pci_device;
+   } 
+   if( !fgets(buf,BUFSIZ,fp) )
+     goto out_find_pci_device;
+   sprintf(cmd,"[%x:%x]", vendor_id, device_id);
+   if( strstr(buf, cmd ) ) {
+     // We have found the string, then we are ok //
+     strcpy(cmd,":");
+     pos = strstr(buf,cmd );
+     strncpy(cmd,pos+1,2 );
+     cmd[2] = 0;
+     *bus_number = atoi(cmd);
+     ret_status = SUCCESSFUL;
+
+   }
+  
+   // lspci -nn -d 494f:
+ out_find_pci_device:
+   unlink( tmpfile );
    return (ret_status);
 }
 
