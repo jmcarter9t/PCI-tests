@@ -2,6 +2,7 @@
 #define DISPLAY_H
 
 #include <ncurses.h>
+#include <string.h>
 #include <sys/io.h>
 #include <unistd.h>
 #include <ctype.h>
@@ -15,6 +16,11 @@
 #define GETCH getch
 #define PUTS  puts
 #define PUTCH ungetch
+/* #define PUTS  puts */
+#define PUTS(...) printw( __VA_ARGS__ ); printw("\n"); refresh();
+/* #define GETS(s) fgets(s,strlen(s)-1,stdin) */
+#define GETS(s)  getstr(s)
+#define SCANF(...) scanw( __VA_ARGS__ )
 #define GOTOXY(x,y)  move(y,x)
 #define WHEREY()  getcury(stdscr)
 #define WHEREX()  getcurx(stdscr)
@@ -23,6 +29,9 @@
 #define TEXTATTR(x) attron(x)
 #define TEXTBACKGROUND(x) {}
 #define WINDOW(h,w,sty,stx) newwin(h,w,sty,stx)
+#define CLREOL()  clrtoeol()
+
+#define ENTER_KEY 0
 
 #define RESETLINE(); (--stdscr->_cury);
 
@@ -38,7 +47,8 @@ init_pair( 4 , COLOR_BLUE      , COLOR_BLACK );\
 init_pair( 5 , COLOR_MAGENTA   , COLOR_BLACK );\
 init_pair( 6 , COLOR_CYAN      , COLOR_BLACK );\
 init_pair( 7 , COLOR_WHITE     , COLOR_BLACK );\
-refresh();
+refresh(); \
+clear();
 
 #define KBHIT()  kbhit()
 

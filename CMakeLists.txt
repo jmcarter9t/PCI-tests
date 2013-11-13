@@ -62,6 +62,7 @@ if (UNIX)
 #
 # Build a library for the irq wrapping
 #
+
 add_library(test_utilities "${PROJECT_SOURCE_DIR}/common/display.c"
                            "${PROJECT_SOURCE_DIR}/common/common_objects.cpp"
                            "${PROJECT_SOURCE_DIR}/common/iiro16.cpp"
@@ -70,6 +71,7 @@ add_library(test_utilities "${PROJECT_SOURCE_DIR}/common/display.c"
                            "${PROJECT_SOURCE_DIR}/common/pciecom8s.cpp" 
                            "${PROJECT_SOURCE_DIR}/common/232test.cpp" 
                            "${PROJECT_SOURCE_DIR}/common/485test.cpp"
+                           "${PROJECT_SOURCE_DIR}/common/8254ctr.cpp"
                            "${PROJECT_SOURCE_DIR}/linux/io.cpp" 
                            "${PROJECT_SOURCE_DIR}/linux/irq.cpp" 
                            "${PROJECT_SOURCE_DIR}/linux/pciutil.cpp" 
@@ -81,9 +83,24 @@ link_directories (${LIB_DIR}/test_utilities)
   set(CORELIBS ${CMAKE_THREAD_LIBS_INIT} ${CURSES_LIBRARY} test_utilities)
 endif(UNIX)
 
-add_executable( pcietest ${COMMON_DIR}/pcietest.cpp  )
-target_link_libraries( pcietest ${CORELIBS} )
 
+add_executable( pcietest ${COMMON_DIR}/pcietest.cpp  )
+
+add_executable( pci_da12_waveforms ${SAMPLES_DIR}/pci_da12_waveforms.cpp )
+target_link_libraries( pci_da12_waveforms ${CORELIBS} curses)
+
+add_executable( pci_da12_setvoltages ${SAMPLES_DIR}/pci_da12_setvoltages.cpp )
+target_link_libraries( pci_da12_setvoltages ${CORELIBS} curses)
+
+add_executable( pci_da12_basic ${SAMPLES_DIR}/pci_da12_basic.cpp )
+target_link_libraries( pci_da12_basic ${CORELIBS} curses)
+
+add_executable( pci_da12 ${SAMPLES_DIR}/pci_da12.cpp )
+target_link_libraries( pci_da12 ${CORELIBS} curses)
+
+
+add_executable( pcietest ${COMMON_DIR}/pcietest.cpp )
+target_link_libraries( pcietest ${CORELIBS} )
 
 add_executable( iiro16_test ${SAMPLES_DIR}/iiro16_test.cpp )
 target_link_libraries( iiro16_test ${CORELIBS} )

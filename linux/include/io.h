@@ -5,7 +5,7 @@
 #include <ncurses.h>
 
 
-#define OUTPORT(address,value) outb(value,address)
+#define OUTPORT(address,value) outw(value,address)
 #define OUTPORTB(address,value) outb(value,address)
 #define INPORT inb_p
 #define INPORTB inb

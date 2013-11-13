@@ -142,5 +142,5 @@ int write_configuration_area(byte function,
                              byte register_number,
                              dword value);
 
-void
-IOPermissions();
+void IOPermissions();
+void IOPermission(unsigned abase);
