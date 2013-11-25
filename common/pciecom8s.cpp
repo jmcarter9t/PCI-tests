@@ -14,7 +14,7 @@ dword vendev=0L;
 byte bn=0;                           //bus_number
 byte df = 0;                         //device_and_function
 byte regnum;
-word index;
+word Index;
 byte h;//temp values for debug
 int foundcount=0;
 word basea,baseb,basec,based,basee,irqnum;
@@ -42,32 +42,32 @@ void eCOM(char *name, byte numport, unsigned short *base, char *prot)
 
             write_configuration_dword(GLOBALS.bn,GLOBALS.df,regnum = 0xB4, PericomControlValuePerProtocolAllPorts[prot[protocol]]);
 
-            for (byte index = 0; index < numport; index++)
+            for (byte Index = 0; Index < numport; Index++)
             {
                 TEXT_COLOR(result?RED:GREEN);
-                CPRINTF("      COM %c:%04X  IRQ:%hu%40s\n\r", port[index], base[index], irqnum, "FOUND");
+                CPRINTF("      COM %c:%04X  IRQ:%hu%40s\n\r", port[Index], base[Index], irqnum, "FOUND");
                 switch(prot[protocol])
                 {
                 case S_232:
-                  DTRTSTest(base, index, 0x01, 0xA0, "DTR");
-                  DTRTSTest(base, index, 0x0A, 0x50, "RTS");
+                  DTRTSTest(base, Index, 0x01, 0xA0, "DTR");
+                  DTRTSTest(base, Index, 0x0A, 0x50, "RTS");
                 case S_422:
-                     result= _16450IRQTest( base[index], irqnum, DebugFlag);
+                     result= _16450IRQTest( base[Index], irqnum, DebugFlag);
                      TEXT_COLOR(result?RED:GREEN);
-                     CPRINTF("      IRQ  COM %c %47s\n\r", port[index],result?"FAILED":"PASSED");
+                     CPRINTF("      IRQ  COM %c %47s\n\r", port[Index],result?"FAILED":"PASSED");
 
-                     result = _16450NotIRQTest(base[index],irqnum,DebugFlag);
+                     result = _16450NotIRQTest(base[Index],irqnum,DebugFlag);
                      TEXT_COLOR(result?RED:GREEN);
-                     CPRINTF("      Not IRQ  COM %c %43s\n\r", port[index],result?"FAILED":"PASSED");
+                     CPRINTF("      Not IRQ  COM %c %43s\n\r", port[Index],result?"FAILED":"PASSED");
 
-                     result = _16450FullDuplex(base[index],DebugFlag);
+                     result = _16450FullDuplex(base[Index],DebugFlag);
                      TEXT_COLOR(result?RED:GREEN);
-                     CPRINTF("      COM Test COM %c%43s\n\r",port[index],result?"FAILED":"PASSED");
+                     CPRINTF("      COM Test COM %c%43s\n\r",port[Index],result?"FAILED":"PASSED");
                      break;
                 case S_485:
-                     result = _16450ShareIRQDebug(base[0],base[1],base[2],base[3],base[4],base[5],base[6],base[7],irqnum,numport,index,DebugFlag);
+                     result = _16450ShareIRQDebug(base[0],base[1],base[2],base[3],base[4],base[5],base[6],base[7],irqnum,numport,Index,DebugFlag);
                      TEXT_COLOR( result ? RED : GREEN );
-                     CPRINTF("      COM %c Output Test %40s\n\r",port[index], result?"FAILED":"PASSED");
+                     CPRINTF("      COM %c Output Test %40s\n\r",port[Index], result?"FAILED":"PASSED");
 
                      break;
 
@@ -80,7 +80,7 @@ void eCOM(char *name, byte numport, unsigned short *base, char *prot)
  
 void PCIeCOM8S(char *name, int numport, byte F1, byte F2, byte F3)
 {
-   int index;
+   int Index ;
    int i;
    byte prot[] = {F1,F2,F3};
    byte start = 0x10;  //location of BAR[0]

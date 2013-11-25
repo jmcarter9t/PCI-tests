@@ -29,8 +29,8 @@ configure_file (
 
 include_directories ( include  )
 
-find_package(Doxygen REQUIRED)
-find_package(LATEX REQUIRED )
+find_package(Doxygen )
+find_package(LATEX  )
 find_package(Git REQUIRED )
 find_package(Threads)
 

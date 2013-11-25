@@ -14,9 +14,7 @@
 #define TEXT_COLOR(x) attron(COLOR_PAIR(x)); _color_display = x; 
 #define GETC  getchar
 #define GETCH getch
-#define PUTS  puts
 #define PUTCH ungetch
-/* #define PUTS  puts */
 #define PUTS(...) printw( __VA_ARGS__ ); printw("\n"); refresh();
 /* #define GETS(s) fgets(s,strlen(s)-1,stdin) */
 #define GETS(s)  getstr(s)
